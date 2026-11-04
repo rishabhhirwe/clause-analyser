@@ -25,4 +25,5 @@ dispute_clause_analyzer = ["rules/*.json", "rules/*.md", "ui/*.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "--cov=dispute_clause_analyzer --cov-report=term-missing"

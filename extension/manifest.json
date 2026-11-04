@@ -1,0 +1,40 @@
+{
+  "manifest_version": "0.4",
+  "name": "clause-analyser",
+  "display_name": "Clause Analyser",
+  "version": "",
+  "description": "Rates the dispute resolution (arbitration) clause of an agreement on Presolv360's 5-point scale.",
+  "long_description": "Attach an agreement and ask Claude to rate the clause. The rating comes from fixed rules, so the same clause always gets the same rating. You get a visual card, a dashboard for several agreements, recommendations and PDF downloads. This tool gives a first review, not legal advice.",
+  "author": {
+    "name": "Presolv360"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rishabhhirwe/clause-analyser"
+  },
+  "homepage": "https://github.com/rishabhhirwe/clause-analyser",
+  "server": {
+    "type": "uv",
+    "entry_point": "src/dispute_clause_analyzer/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "dispute-clause-analyzer"]
+    }
+  },
+  "tools": [
+    {"name": "rate_clause", "description": "Rate a dispute resolution clause out of 5"},
+    {"name": "show_report_card", "description": "Show the visual report card for one agreement"},
+    {"name": "show_portfolio", "description": "Show the dashboard for several agreements"},
+    {"name": "suggest_better_clause", "description": "Suggest wording that raises the rating"},
+    {"name": "save_report_pdf", "description": "Save a PDF report for one agreement"},
+    {"name": "save_portfolio_pdf", "description": "Save one PDF report for several agreements"}
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  },
+  "keywords": ["arbitration", "dispute resolution", "contracts", "legal"],
+  "license": "MIT"
+}
