@@ -1,0 +1,4 @@
+8.3. Disputes : Notwithstanding anything to the contrary contained herein, any dispute, controversy and / or claim arising out of and / or relating to this Agreement ("Dispute"), shall be resolved by arbitration, administered electronically and as chosen by the party initiating the arbitration when a dispute arises, by either one of the following arbitration institutions:
+1. Presolv360 (Presolv), an online dispute resolution platform; or,
+2. Example ODR Centre, an online dispute resolution platform;
+and in accordance with its Dispute Resolution Rules ("Rules"). The Parties agree that the arbitration shall be before a sole arbitrator appointed under the Rules. The juridical seat of arbitration shall be Kolkata, West Bengal. The language of arbitration shall be English. The decision of the arbitrator shall be final and binding on the Parties.

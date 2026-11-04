@@ -1,0 +1,6 @@
+(u) Governing Law and Dispute Resolution
+1. The Parties agree that this Agreement shall be governed by the laws of India.
+2. Any dispute arising out of or relating to this Agreement shall be resolved through arbitration in accordance with the Arbitration and Conciliation Act, 1996, through an online dispute resolution ("ODR") platform. The party invoking arbitration ("Claimant") shall address a notice to the other party ("Respondent") suggesting the name of one of the following ODR platforms (Designated Institution) as stated below or any other ODR platform:
+- Presolv360 ODR Institution; or
+- Example ODR Institution
+3. The seat of the arbitration shall be decided basis the zone from which the case is sourced. The award passed by the arbitrator shall be final and binding on the Parties.

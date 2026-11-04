@@ -1,0 +1,63 @@
+{
+  "_about": "Suggested improvements, keyed by current type. 'next_step' is the smallest change that moves the clause up the scale while keeping the lender's own drafting. 'top_option' reaches 5/5. Institution names in brackets are placeholders for the parties to choose.",
+  "unilateral": {
+    "next_step": {
+      "rating_after": 4,
+      "change": "Replace the lender's nomination of the arbitrator with an appointment by an online dispute resolution institution under its rules.",
+      "wording": "...shall be referred to arbitration by a sole arbitrator appointed by an online dispute resolution institution in accordance with its Dispute Resolution Rules..."
+    },
+    "top_option": {
+      "rating_after": 5,
+      "change": "Name the online dispute resolution institution(s) in the contract.",
+      "wording": "...shall be resolved by arbitration, administered electronically by [named ODR institution, e.g. Presolv360], in accordance with its Dispute Resolution Rules. The arbitration shall be before a sole arbitrator appointed under the Rules..."
+    }
+  },
+  "mutual_consent": {
+    "next_step": {
+      "rating_after": 4,
+      "change": "Let an online dispute resolution institution appoint the arbitrator instead of the parties (or a list proposed by the lender).",
+      "wording": "...by a sole arbitrator appointed by an online dispute resolution institution in accordance with its Dispute Resolution Rules..."
+    },
+    "top_option": {
+      "rating_after": 5,
+      "change": "Name the online dispute resolution institution(s) in the contract.",
+      "wording": "...shall be resolved by arbitration, administered electronically by [named ODR institution, e.g. Presolv360], in accordance with its Dispute Resolution Rules. The arbitration shall be before a sole arbitrator appointed under the Rules..."
+    }
+  },
+  "institutional": {
+    "next_step": {
+      "rating_after": 4,
+      "change": "Specify that the institution is an online dispute resolution institution that appoints the arbitrator under its rules.",
+      "wording": "...administered electronically by an online dispute resolution institution, which shall appoint a sole arbitrator in accordance with its Dispute Resolution Rules..."
+    },
+    "top_option": {
+      "rating_after": 5,
+      "change": "Name the institution(s) in the contract instead of describing them.",
+      "wording": "...shall be resolved by arbitration, administered electronically by [named ODR institution, e.g. Presolv360], in accordance with its Dispute Resolution Rules..."
+    }
+  },
+  "odr": {
+    "next_step": {
+      "rating_after": 5,
+      "change": "Name the ODR institution(s) in the contract instead of referring to a list kept by the lender. Naming more than one, with the initiating party choosing, is also rated 5/5.",
+      "wording": "...administered electronically, as chosen by the party initiating the arbitration, by either [named ODR institution, e.g. Presolv360] or [second named ODR institution], in accordance with its Dispute Resolution Rules..."
+    },
+    "top_option": {
+      "rating_after": 5,
+      "change": "Same as the next step: name the institution(s).",
+      "wording": "...shall be resolved by arbitration, administered electronically by [named ODR institution, e.g. Presolv360], in accordance with its Dispute Resolution Rules..."
+    }
+  },
+  "presolv360": {
+    "next_step": {
+      "rating_after": 5,
+      "change": "No change needed to the appointment. Check the other details, for example that a single seat is named.",
+      "wording": ""
+    },
+    "top_option": {
+      "rating_after": 5,
+      "change": "Already at the top of the scale.",
+      "wording": ""
+    }
+  }
+}

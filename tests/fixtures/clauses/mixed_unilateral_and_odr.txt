@@ -1,0 +1,4 @@
+13. Arbitration
+(i) Any dispute or difference arising under this Agreement shall be referred to and settled by arbitration under the Arbitration and Conciliation Act, 1996 or any statutory amendments thereof, of a sole arbitrator to be nominated by the Lender, and in the event of death, unwillingness, refusal, neglect or inability of the arbitrator so appointed, another sole arbitrator shall be nominated by the Lender.
+(ii) Notwithstanding anything to the contrary contained herein, the Lender may, at its option, refer any dispute to arbitration under the Arbitration and Conciliation Act, 1996 (as amended) which may be administered electronically under Online Dispute Resolution (ODR), in accordance with its Dispute Resolution Rules ("Rules"), before a sole arbitrator appointed under the Rules.
+(iii) The seat of arbitration shall be New Delhi.

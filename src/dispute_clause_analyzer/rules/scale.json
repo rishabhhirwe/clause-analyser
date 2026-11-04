@@ -1,0 +1,99 @@
+{
+  "_about": "Presolv360 dispute clause rating scale. Source of truth: Presolv360's clause rating document and a set of reference agreements, with mixed-clause averaging ruled by the legal team on 2026-11-03. Signals are regular expressions matched against the clause in lowercase, with line breaks and extra spaces collapsed to single spaces. 'risk' is the one-line reason shown on the card; 'strengths' are the key takeaways shown for good ratings (4/5 and above).",
+  "version": "2026-10-30",
+  "types": [
+    {
+      "id": "presolv360",
+      "label": "Presolv360",
+      "rating": 5,
+      "headline": "A named online institution runs the case and picks the arbitrator.",
+      "risk": "A named, neutral online institution appoints the arbitrator under its own rules, which leaves little room to dispute the appointment and lets the case move quickly.",
+      "strengths": [
+        "A named, independent institution appoints the arbitrator, so neither side picks the judge.",
+        "The institution's own rules govern the process, which reduces arguments about procedure.",
+        "The case can run online, so filings and hearings need no travel."
+      ],
+      "meaning": "Presolv360 is named in the contract as the institution that administers the arbitration (alone or as one of the named options), and the arbitrator is appointed under its rules.",
+      "signals": [
+        "presolv ?-?360",
+        "\\bpresolv\\b"
+      ]
+    },
+    {
+      "id": "odr",
+      "label": "ODR",
+      "rating": 4,
+      "headline": "An online institution picks the arbitrator, but none is named in the contract.",
+      "risk": "An online institution rather than the lender appoints the arbitrator, which keeps the process neutral, but because none is named the parties may argue over which one to use.",
+      "strengths": [
+        "An online dispute resolution institution, not the lender, appoints the arbitrator.",
+        "The institution's rules govern the process, which keeps the procedure neutral.",
+        "The case can run online, which keeps it quick and low-cost."
+      ],
+      "meaning": "An online dispute resolution institution appoints the arbitrator under its rules, but no institution is named in the contract (for example, any ODR on a list kept by the lender).",
+      "signals": [
+        "appointed by any online dispute resolution",
+        "administered electronically under online dispute resolution",
+        "odr platforms? \\(designated institution\\)",
+        "arbitral institution designated as odr",
+        "appointed by (?:any|an) (?:odr|online dispute resolution) (?:platform|institution|forum)"
+      ]
+    },
+    {
+      "id": "institutional",
+      "label": "Institutional",
+      "rating": 3,
+      "headline": "An institution picks the arbitrator, but it is not named.",
+      "risk": "An institution appoints the arbitrator, but because it is only described and not named, the parties can dispute which institution qualifies, which can delay the start of the case.",
+      "strengths": [],
+      "meaning": "An unnamed institution (for example 'a recognised independent institution' or 'an institution recognized by the government of India') administers the arbitration and appoints the arbitrator.",
+      "signals": [
+        "recogni[sz]ed independent institution",
+        "institution recogni[sz]ed by the government"
+      ]
+    },
+    {
+      "id": "mutual_consent",
+      "label": "Mutual consent",
+      "rating": 3,
+      "headline": "Both sides must agree on the arbitrator, which can stall the case.",
+      "risk": "Both sides must agree on one arbitrator, so if they cannot agree, or the borrower must pick from names the lender chose, a party may have to go to court for an appointment, causing delay.",
+      "strengths": [],
+      "meaning": "The parties appoint the sole arbitrator by mutual consent, including when the borrower must choose from names proposed by the lender.",
+      "signals": [
+        "mutual consent of the parties",
+        "mutually \\w+ by the parties",
+        "\\w+ mutually by the parties",
+        "propose 3 \\(three\\) names",
+        "amongst the 3 arbitrators",
+        "three \\(3\\) names",
+        "propose 3 names"
+      ]
+    },
+    {
+      "id": "unilateral",
+      "label": "Unilateral",
+      "rating": 2,
+      "headline": "The lender picks the judge for its own case.",
+      "risk": "The lender alone picks the arbitrator, so the appointment can be challenged as one-sided, risking court applications, delay and the award being set aside.",
+      "strengths": [],
+      "meaning": "The lender alone nominates or appoints the arbitrator.",
+      "signals": [
+        "arbitrator\\W+(?:\\w+\\W+){0,4}?(?:nominated|appointed)(?: ?/ ?(?:nominated|appointed))?(?: solely)? by the (?:lender|bank)\\b",
+        "(?:lender|bank) (?:shall|may|will) (?:appoint|nominate) (?:a |the )?(?:sole )?arbitrator"
+      ]
+    }
+  ],
+  "mixed_clause_rules": [
+    "If the clause has more than one way of picking the arbitrator, the rating is the average of the ratings of each way, shown to one decimal place (example: Unilateral 2/5 + ODR 4/5 = 3/5). A 'notwithstanding' part does not override the rest. Ruled by the legal team on 2026-11-03.",
+    "Presolv360 named together with other named ODR institutions only is one way of picking, rated 5/5. Presolv360 together with 'any other ODR platform' is a mix of Presolv360 5/5 and ODR 4/5, so 4.5/5.",
+    "Rate by who picks the arbitrator. Wording that only says the case may be conducted online does not change the rating (a mutual consent clause with online hearings stays 3/5)."
+  ],
+  "mixed": {
+    "label": "Mixed",
+    "headline": "This clause has more than one way of picking the arbitrator, so the rating is the average of its parts.",
+    "risk": "It is not clear which way of picking the arbitrator applies, which invites an argument when a dispute arises.",
+    "parts_line": "Average of {parts}",
+    "recommendation": "Keep the clause straightforward and unambiguous: use a single way of picking the arbitrator. Today it mentions {labels}."
+  }
+}

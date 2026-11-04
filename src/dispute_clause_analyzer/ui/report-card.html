@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clause report card</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f6f5f1; --text: #1f1e1c; --muted: #6b6a65; --line: rgba(0,0,0,0.10);
+    --red: #b42318; --red-bg: #fdecea; --orange: #b54708; --orange-bg: #fff1e3;
+    --yellow: #8a6100; --yellow-bg: #fdf5d9; --green: #1d7a46; --green-bg: #e6f4ea;
+    --gray: #5f5e5a; --gray-bg: #efeeea; --mark: rgba(250, 199, 117, 0.55);
+  }
+  :root[data-theme="dark"] {
+    --bg: #262624; --panel: #30302e; --text: #f2f1ee; --muted: #a8a7a1; --line: rgba(255,255,255,0.12);
+    --red: #f59a92; --red-bg: #4a1e1b; --orange: #f6b277; --orange-bg: #4a2b14;
+    --yellow: #f0cf6b; --yellow-bg: #463a12; --green: #82d3a3; --green-bg: #173a26;
+    --gray: #c9c8c2; --gray-bg: #3a3a37; --mark: rgba(239, 159, 39, 0.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: transparent; overflow: hidden; }
+  body { font: 15px/1.6 "Times New Roman", Times, serif; color: var(--text); }
+  .card { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .score { display: flex; align-items: center; gap: 14px; }
+  .gauge { display: block; width: 116px; height: 78px; flex: none; }
+  .gauge .track { stroke: var(--line); }
+  .gauge .fill { stroke: var(--tone); }
+  .gauge .num { fill: var(--tone); font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .gauge .of { fill: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .label { margin: 0; font-size: 20px; font-weight: 650; color: var(--tone); }
+  .label-sub { margin: 0; font-size: 12px; color: var(--muted); }
+  .headline { margin: 2px 0 0; color: var(--muted); }
+  .risk-box { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; border-left: 4px solid var(--tone); background: var(--tone-bg); }
+  .risk-box b { display: block; margin-bottom: 2px; font-size: 12px; color: var(--tone); text-transform: uppercase; letter-spacing: 0.04em; }
+  .risk-box p { margin: 0; }
+  .pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .pill.ok { background: var(--green-bg); color: var(--green); }
+  .pill.review { background: var(--orange-bg); color: var(--orange); }
+  .reasons { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: var(--orange-bg); color: var(--orange); font-size: 13px; }
+  .reasons p { margin: 0; }
+  .ladder { margin: 18px 0 4px; display: grid; grid-template-columns: repeat(var(--steps), 1fr); gap: 6px; }
+  .bar { height: 10px; border-radius: 5px; background: var(--panel); border: 1px solid var(--line); }
+  .bar.fill { background: var(--tone); border-color: var(--tone); }
+  .steps { display: grid; grid-template-columns: repeat(var(--steps), 1fr); gap: 6px; font-size: 11px; color: var(--muted); }
+  .steps .now { color: var(--tone); font-weight: 600; }
+  .facts { margin: 16px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 420px) { .facts { grid-template-columns: 1fr; } }
+  .fact { background: var(--panel); border-radius: 10px; padding: 8px 10px; }
+  .fact small { display: block; font-size: 11px; color: var(--muted); }
+  .section { margin: 16px 0 6px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .quote { margin: 0; padding: 2px 0 2px 12px; border-left: 3px solid var(--tone); font-family: "Times New Roman", Times, serif; font-size: 16px; }
+  mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 2px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  button { font: inherit; font-size: 13px; color: var(--text); background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; cursor: pointer; }
+  button:hover { background: var(--panel); }
+  button.on { background: var(--panel); border-color: var(--muted); }
+  .fix { margin-top: 8px; background: var(--panel); border-radius: 10px; padding: 12px 14px; }
+  .fix p { margin: 0 0 6px; }
+  .fix .change { color: var(--muted); font-size: 13px; }
+  del { color: var(--red); }
+  ins { text-decoration: none; color: var(--green); font-weight: 600; }
+  .top { margin-top: 8px; padding: 12px 14px; border-radius: 10px; background: var(--green-bg); color: var(--green); }
+  .foot { margin-top: 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .foot small { color: var(--muted); }
+  .hidden { display: none; }
+  .pf-title { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .pf-title b { font-size: 16px; font-weight: 600; }
+  .pf-title small, .muted { color: var(--muted); font-size: 12px; }
+  .metrics { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; margin-bottom: 14px; }
+  @media (max-width: 480px) { .metrics { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .metric { background: var(--panel); border-radius: 10px; padding: 10px 12px; }
+  .metric small { display: block; font-size: 11px; color: var(--muted); }
+  .metric b { display: block; font-size: 22px; font-weight: 600; line-height: 1.3; }
+  .dist { display: flex; gap: 2px; height: 14px; border-radius: 7px; overflow: hidden; margin-bottom: 6px; }
+  .dist-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 6px; border-top: 1px solid var(--line); cursor: pointer; background: transparent; border-radius: 0; width: 100%; text-align: left; border-left: 0; border-right: 0; border-bottom: 0; }
+  .row:hover { background: var(--panel); }
+  .dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; }
+  .row .name { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+  .detail { margin: 2px 0 12px; padding: 16px 18px; border: 1px solid var(--line); border-left: 4px solid var(--tone); border-radius: 12px; background: var(--bg); }
+  .note { margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--panel); font-size: 13px; }
+  .flag { color: var(--orange); }
+  .good { color: var(--green); }
+  .takeaways { margin: 0; padding: 0; list-style: none; }
+  .takeaways li { position: relative; padding: 5px 0 5px 22px; }
+  .takeaways li::before { content: "✓"; position: absolute; left: 3px; color: var(--green); font-weight: 700; }
+  .disclaimer { flex: 1 1 340px; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+  .disclaimer b { display: block; color: var(--text); font-size: 12px; margin-bottom: 2px; }
+  .disclaimer p { margin: 0; }
+  .foot { align-items: flex-end; }
+  button.primary { background: var(--text); color: var(--bg); border-color: var(--text); white-space: nowrap; }
+  button.primary:hover { opacity: 0.9; background: var(--text); }
+  button.link { border: 0; padding: 2px 0; background: transparent; color: var(--muted); font-size: 12px; text-decoration: underline; }
+  button.link:hover { background: transparent; color: var(--text); }
+  .also { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: var(--orange-bg); color: var(--orange); font-size: 13px; }
+  .also p { margin: 0 0 4px; }
+  .up { color: var(--green); font-weight: 600; }
+  .waiting { color: var(--muted); padding: 18px 20px; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; }
+  .waiting p { margin: 0 0 10px; }
+</style>
+</head>
+<body>
+<div id="waiting" class="waiting">Preparing the report…</div>
+<div id="card" class="card hidden" role="region" aria-label="Clause report card"></div>
+<script>
+(function () {
+  "use strict";
+  var PROTOCOL_VERSION = "2026-01-26";
+  var nextId = 1;
+  var pending = {};
+  var state = { card: null, step: 0, filter: "all", open: null };
+
+  function send(message) { window.parent.postMessage(message, "*"); }
+  function notify(method, params) { send({ jsonrpc: "2.0", method: method, params: params || {} }); }
+  function request(method, params) {
+    var id = nextId++;
+    send({ jsonrpc: "2.0", id: id, method: method, params: params || {} });
+    return new Promise(function (resolve, reject) { pending[id] = { resolve: resolve, reject: reject }; });
+  }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined && text !== null) node.textContent = String(text);
+    return node;
+  }
+  function add(parent) { for (var i = 1; i < arguments.length; i++) if (arguments[i]) parent.appendChild(arguments[i]); return parent; }
+
+  function applyTheme(theme) {
+    var dark = theme ? theme === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  }
+
+  function highlighted(quote, phrases) {
+    var p = el("p", "quote");
+    var lower = quote.toLowerCase();
+    var spans = [];
+    (phrases || []).forEach(function (phrase) {
+      var at = lower.indexOf(String(phrase).toLowerCase());
+      if (at >= 0) spans.push([at, at + phrase.length]);
+    });
+    spans.sort(function (a, b) { return a[0] - b[0]; });
+    var cursor = 0;
+    spans.forEach(function (s) {
+      if (s[0] < cursor) return;
+      p.appendChild(document.createTextNode(quote.slice(cursor, s[0])));
+      p.appendChild(el("mark", null, quote.slice(s[0], s[1])));
+      cursor = s[1];
+    });
+    p.appendChild(document.createTextNode(quote.slice(cursor)));
+    return p;
+  }
+
+  function svg(tag, attrs, text) {
+    var node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.keys(attrs).forEach(function (k) { node.setAttribute(k, attrs[k]); });
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  // The score is a half-circle gauge filled up to the rating (2.5 fills halfway between 2 and 3),
+  // so it reads as a score and cannot be mistaken for a serial number.
+  function gauge(card) {
+    var arc = "M 10 64 A 48 48 0 0 1 106 64";
+    var line = { d: arc, fill: "none", "stroke-width": 10, "stroke-linecap": "round", pathLength: 100 };
+    var share = card.rating === null ? 0 : Math.max(0, Math.min(1, card.rating / card.out_of)) * 100;
+    var root = svg("svg", { class: "gauge", viewBox: "0 0 116 78", role: "img",
+      "aria-label": card.rating === null ? "Not rated" : "Rating " + card.rating + " out of " + card.out_of });
+    root.appendChild(svg("path", Object.assign({ class: "track" }, line)));
+    if (share) root.appendChild(svg("path", Object.assign({ class: "fill", "stroke-dasharray": share + " 100" }, line)));
+    root.appendChild(svg("text", { class: "num", x: 58, y: 62, "text-anchor": "middle" }, card.rating === null ? "–" : String(card.rating)));
+    root.appendChild(svg("text", { class: "of", x: 58, y: 76, "text-anchor": "middle" }, "out of " + card.out_of));
+    return root;
+  }
+
+  function header(card) {
+    // A mixed clause shows its parts here, e.g. "Average of ODR 4/5 and Unilateral 2/5".
+    var title = add(el("div"), el("p", "label", card.label), el("p", "label-sub", card.parts_line || "Dispute resolution clause type"));
+    var head = add(el("div", "head"), add(el("div", "score"), gauge(card), title));
+    if (card.needs_review) head.appendChild(el("span", "pill review", "Needs human review"));
+    return head;
+  }
+
+  function reasons(card) {
+    if (!card.needs_review || !card.review_reasons.length) return null;
+    var box = el("div", "reasons");
+    card.review_reasons.forEach(function (r) { box.appendChild(el("p", null, r)); });
+    return box;
+  }
+
+  var FACT_LABELS = [
+    ["clause_reference", "Clause"], ["who_picks", "Arbitrator to be appointed by"],
+    ["seat", "Seat / place of execution"], ["online_process", "Online process"]
+  ];
+
+  // fact_rows comes from the server; FACT_LABELS only covers cards saved before it existed.
+  function factRows(card) {
+    if (card.fact_rows) return card.fact_rows;
+    return FACT_LABELS.map(function (f) { return { label: f[1], value: card.facts[f[0]] }; });
+  }
+
+  function facts(card) {
+    var grid = el("div", "facts");
+    factRows(card).forEach(function (row) {
+      var value = row.value || "Not stated";
+      grid.appendChild(add(el("div", "fact"), el("small", null, row.label), el("span", value === "Not stated" ? "muted" : null, value)));
+    });
+    return grid;
+  }
+
+  // Low ratings (below 4/5) carry a one-line risk; high ratings carry key takeaways instead.
+  function riskBox(card) {
+    if (!card.risk) return null;
+    return add(el("div", "risk-box"), el("b", null, "⚠️ Risk"), el("p", null, card.risk));
+  }
+
+  function takeaways(items) {
+    if (!items || !items.length) return null;
+    var list = el("ul", "takeaways");
+    items.forEach(function (t) { list.appendChild(el("li", null, t)); });
+    return add(el("div"), el("p", "section", "Key takeaways"), list);
+  }
+
+  function disclaimerBlock(text) {
+    var box = el("div", "disclaimer");
+    var m = /^Disclaimer\s*[-–:]\s*/.exec(text || "");
+    if (m) add(box, el("b", null, "Disclaimer"), el("p", null, text.slice(m[0].length)));
+    else box.appendChild(el("p", null, text || ""));
+    return box;
+  }
+
+  function currentStep(card) {
+    return card.path[Math.min(state.step, card.path.length - 1)];
+  }
+
+  function fixBody(card) {
+    var step = currentStep(card);
+    var box = el("div", "fix");
+    box.appendChild(el("p", "change", step.change));
+    var line = el("p");
+    if (state.step === 0 && card.deciding_quote) {
+      add(line, el("del", null, card.deciding_quote), document.createTextNode(" → "));
+    }
+    line.appendChild(el("ins", null, step.wording));
+    var copy = el("button", "link", "Copy wording");
+    copy.addEventListener("click", function () { copyText(step.wording, copy); });
+    return add(box, line, copy);
+  }
+
+  function tidyList(notes) {
+    var box = el("div", "also");
+    notes.forEach(function (n) { box.appendChild(el("p", null, n)); });
+    return box;
+  }
+
+  function pathSection(card) {
+    var wrap = el("div");
+    if (!card.top_rated && card.path.length) {
+      wrap.appendChild(el("p", "section", "Recommendation"));
+      var tabs = el("div", "tabs");
+      card.path.forEach(function (step, i) {
+        var b = el("button", state.step === i ? "on" : null, step.label + " → " + step.rating_after + "/5");
+        b.setAttribute("aria-pressed", String(state.step === i));
+        b.addEventListener("click", function () { state.step = i; render(); });
+        tabs.appendChild(b);
+      });
+      add(wrap, tabs, fixBody(card));
+    }
+    if (card.also && card.also.length) add(wrap, el("p", "section", "Also tidy up"), tidyList(card.also));
+    return wrap.childNodes.length ? wrap : null;
+  }
+
+  function copyText(text, button) {
+    function done(label) { button.textContent = label; setTimeout(function () { button.textContent = "Copy wording"; }, 1600); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done("Copied"); }, function () { done("Copy not allowed here"); });
+    } else { done("Copy not allowed here"); }
+  }
+
+  function pdfFrom(result) {
+    if (!result || result.isError) throw new Error(firstText(result && result.content) || "PDF failed");
+    return result.structuredContent || JSON.parse(firstText(result.content));
+  }
+
+  function callPdf(save) {
+    var args = state.args || {};
+    var facts = state.card && state.card.facts;
+    var title = args.file_name || (facts && facts.clause_reference) || "";
+    return request("tools/call", { name: "download_report_pdf", arguments: { original_arguments: args, title: title, save: save } }).then(pdfFrom);
+  }
+
+  var CHECKS = 10;          // look for the downloaded file this many times...
+  var CHECK_EVERY_MS = 1000; // ...this far apart, after the app's download dialog closes
+
+  // The app reports success even when the user clicks Cancel, so look for the file in Downloads.
+  // Resolves true (found), false (not found) or null (the check is not available).
+  function arrived(fileName) {
+    function check(left) {
+      return request("tools/call", { name: "download_status", arguments: { file_name: fileName } }).then(pdfFrom)
+        .then(function (status) {
+          if (status.found || left <= 1) return status.found;
+          return new Promise(function (r) { setTimeout(r, CHECK_EVERY_MS); }).then(function () { return check(left - 1); });
+        });
+    }
+    return check(CHECKS).catch(function () { return null; });
+  }
+
+  function denied(error) { return /denied|cancel/i.test((error && error.message) || ""); }
+
+  var READY = "Download PDF";
+
+  // Ask the app to hand the file to the user. If the app cannot download files at all, save it to the
+  // Downloads folder instead. If the user clicks Cancel the button simply goes back to "Download PDF";
+  // once the file is really in Downloads it shows "✓ Downloaded" with the file name.
+  function downloadPdf(button) {
+    function done(label) { button.textContent = label; button.disabled = false; }
+    function savedName(path) { return path.split(/[\\/]/).pop(); }
+    function saveInstead() {
+      return callPdf(true).then(function (saved) {
+        done(saved.saved_to ? "✓ Saved to Downloads: " + savedName(saved.saved_to) : "Download not available here");
+      });
+    }
+    button.disabled = true;
+    button.textContent = "Preparing PDF…";
+    callPdf(false).then(function (data) {
+      // A plain file name: the app saves the file under the last part of this address as written.
+      var file = { type: "resource", resource: { uri: "file:///" + data.file_name, mimeType: data.mime_type, blob: data.pdf_base64 } };
+      return request("ui/download-file", { contents: [file] }).then(function () {
+        done(READY);
+        return arrived(data.file_name).then(function (found) {
+          if (found && button.textContent === READY) button.textContent = "✓ Downloaded: " + data.file_name;
+        });
+      }, function (error) { return denied(error) ? done(READY) : saveInstead(); });
+    }).catch(function () { done("Download not available here"); });
+  }
+
+  function pdfButton() {
+    var pdf = el("button", "primary", "Download PDF");
+    pdf.addEventListener("click", function () { downloadPdf(pdf); });
+    return pdf;
+  }
+
+  function footer(card) {
+    var foot = add(el("div", "foot"), disclaimerBlock(card.disclaimer));
+    if (state.args && card.rating !== null) foot.appendChild(pdfButton());
+    return foot;
+  }
+
+  function toneVars(node, tone) {
+    node.style.setProperty("--tone", "var(--" + (tone || "gray") + ")");
+    node.style.setProperty("--tone-bg", "var(--" + (tone || "gray") + "-bg)");
+    return node;
+  }
+
+  var TONE_BY_RATING = { 5: "green", 4: "yellow", 3: "orange", 2: "red" };
+
+  function metric(label, value, sub) {
+    return add(el("div", "metric"), el("small", null, label), el("b", null, value), el("small", null, sub));
+  }
+
+  function portfolioSummary(data) {
+    var s = data.summary;
+    var metrics = add(el("div", "metrics"),
+      metric("Average rating", s.average === null ? "–" : s.average.toFixed(1), "out of 5"),
+      metric("Top rated", s.top_rated, "at 5/5"),
+      metric("Lowest rated", s.lowest_rated, "at 2/5, fix first"),
+      // Shown only when an agreement could not be rated or its deciding line was not found in the clause.
+      s.needs_review ? metric("Needs review", s.needs_review, "check these") : null);
+    var bar = el("div", "dist");
+    var legend = el("div", "dist-legend");
+    Object.keys(s.distribution).sort().reverse().forEach(function (r) {
+      var n = s.distribution[r];
+      if (!n) return;
+      // A half score such as 4.5 takes the colour of its whole number, like the server's tone.
+      var seg = toneVars(el("div"), TONE_BY_RATING[Math.floor(Number(r))]);
+      seg.style.flex = String(n);
+      seg.style.background = "var(--tone)";
+      bar.appendChild(seg);
+      legend.appendChild(el("span", null, r + "/5 · " + n));
+    });
+    if (s.unrated) legend.appendChild(el("span", null, "Not rated · " + s.unrated));
+    return add(el("div"), metrics, bar, legend);
+  }
+
+
+  function portfolioFilters(data) {
+    var options = [["all", "All " + data.summary.total]];
+    Object.keys(data.summary.distribution).sort().forEach(function (r) {
+      if (data.summary.distribution[r]) options.push([r, r + "/5"]);
+    });
+    if (data.summary.needs_review) options.push(["review", "Needs review"]);
+    var tabs = el("div", "tabs");
+    options.forEach(function (o) {
+      var b = el("button", state.filter === o[0] ? "on" : null, o[1]);
+      b.setAttribute("aria-pressed", String(state.filter === o[0]));
+      b.addEventListener("click", function () { state.filter = o[0]; state.open = null; render(); });
+      tabs.appendChild(b);
+    });
+    return tabs;
+  }
+
+  function matchesFilter(item) {
+    if (state.filter === "all") return true;
+    if (state.filter === "review") return item.needs_review;
+    return String(item.rating) === state.filter;
+  }
+
+  // Clicking a row opens that agreement's full card (the same one a single upload gets). The disclaimer is
+  // shown once, at the bottom of the dashboard, not in each card.
+  function portfolioDetail(item) {
+    var card = item.card;
+    var box = toneVars(el("div", "detail"), card.tone);
+    cardBody(card).forEach(function (node) { box.appendChild(node); });
+    return box;
+  }
+
+  function portfolioRow(item, index) {
+    var row = toneVars(el("button", "row"), item.tone);
+    row.setAttribute("aria-expanded", String(state.open === index));
+    var dot = el("div", "dot", item.rating === null ? "–" : item.rating);
+    dot.style.background = "var(--tone-bg)";
+    dot.style.color = "var(--tone)";
+    var middle = add(el("div"), el("p", "name", item.file_name),
+      el("small", "muted", [item.lender, item.clause_reference].filter(Boolean).join(" · ")));
+    var label = el("span", item.needs_review ? "flag" : "muted", item.label + (state.open === index ? " ▾" : " ›"));
+    row.addEventListener("click", function () { state.open = state.open === index ? null : index; state.step = 0; render(); });
+    return add(row, dot, middle, label);
+  }
+
+  function renderPortfolio(root, data) {
+    add(root, add(el("div", "pf-title"), el("b", null, "Clause Rating Report · " + data.summary.total + (data.summary.total === 1 ? " agreement" : " agreements"))),
+      portfolioSummary(data), portfolioFilters(data));
+    var list = el("div");
+    list.style.marginTop = "8px";
+    data.items.forEach(function (item, index) {
+      if (!matchesFilter(item)) return;
+      list.appendChild(portfolioRow(item, index));
+      if (state.open === index) list.appendChild(portfolioDetail(item));
+    });
+    var foot = add(el("div", "foot"), disclaimerBlock(data.disclaimer));
+    if (state.args && Array.isArray(state.args.agreements)) foot.appendChild(pdfButton());
+    add(root, list, foot);
+  }
+
+  // Everything on a single-agreement card above the footer, as a list of nodes.
+  function cardBody(card) {
+    var nodes = [header(card), riskBox(card), takeaways(card.strengths), reasons(card), facts(card)];
+    if (card.note) nodes.push(el("p", "note", card.note));
+    // One line per way of picking the arbitrator; older cards only have deciding_quote.
+    var lines = card.deciding_lines || (card.deciding_quote ? [card.deciding_quote] : []);
+    if (lines.length) {
+      nodes.push(el("p", "section", lines.length === 1 ? "The line that decides it" : "The lines that decide it"));
+      lines.forEach(function (line) { nodes.push(highlighted(line, card.matched_wording)); });
+    }
+    if (card.rating !== null) nodes.push(pathSection(card));
+    return nodes.filter(Boolean);
+  }
+
+  function render() {
+    var card = state.card;
+    if (!card) return;
+    var root = document.getElementById("card");
+    root.replaceChildren();
+    if (card.kind === "portfolio") {
+      root.setAttribute("aria-label", "Clause Rating Report");
+      renderPortfolio(root, card);
+      document.getElementById("waiting").classList.add("hidden");
+      root.classList.remove("hidden");
+      return;
+    }
+    // kind: report_card (a single agreement)
+    toneVars(root, card.tone);
+    cardBody(card).forEach(function (node) { root.appendChild(node); });
+    root.appendChild(footer(card));
+    document.getElementById("waiting").classList.add("hidden");
+    root.classList.remove("hidden");
+  }
+
+  var WAIT_MS = (function () { var m = /wait=(\d+)/.exec(location.hash || ""); return m ? Number(m[1]) : 12000; })();
+  var CACHE_PREFIX = "dca-report:";
+  var CACHE_INDEX = "dca-report-index";
+  var CACHE_LIMIT = 30;
+  var seen = [];
+  var waitTimer = null;
+  // While Claude is still writing the tool's input (a long bulk upload can take a minute or more), the app sends
+  // tool-input-partial. Only if that goes quiet this long is the "data has not arrived" help shown.
+  var QUIET_MS = 120000;
+
+  function restartWaitTimer(ms) {
+    clearTimeout(waitTimer);
+    waitTimer = setTimeout(showWaitingHelp, ms);
+  }
+
+  function showProgress(args) {
+    if (state.card) return;
+    var agreements = args && Array.isArray(args.agreements) ? args.agreements.length : 0;
+    document.getElementById("waiting").textContent = agreements
+      ? "Claude is reading the agreements… " + agreements + " so far"
+      : "Claude is reading the clause…";
+    restartWaitTimer(QUIET_MS);
+  }
+
+  function firstText(content) {
+    var parts = Array.isArray(content) ? content : [];
+    for (var i = 0; i < parts.length; i++) if (parts[i] && parts[i].type === "text" && parts[i].text) return String(parts[i].text);
+    return "";
+  }
+
+  // A result may arrive with structured data, or (in a restored chat) as JSON text only.
+  function reportFrom(result) {
+    if (!result || result.isError) return null;
+    var data = result.structuredContent;
+    if (!data) { try { data = JSON.parse(firstText(result.content)); } catch (e) { data = null; } }
+    return data && (data.kind === "portfolio" || data.kind === "report_card") ? data : null;
+  }
+
+  // Saved copies are keyed by the original request, so a reopened chat finds its own report.
+  function argsKey(args) {
+    var text = JSON.stringify(args || {});
+    var h = 2166136261;
+    for (var i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return CACHE_PREFIX + (h >>> 0).toString(16) + ":" + text.length;
+  }
+
+  function storage() { try { return window.localStorage; } catch (e) { return null; } }
+
+  function saveReport(args, data) {
+    var store = storage();
+    if (!store || !args) return;
+    try {
+      var key = argsKey(args);
+      store.setItem(key, JSON.stringify(data));
+      var index = JSON.parse(store.getItem(CACHE_INDEX) || "[]").filter(function (k) { return k !== key; });
+      index.push(key);
+      while (index.length > CACHE_LIMIT) store.removeItem(index.shift());
+      store.setItem(CACHE_INDEX, JSON.stringify(index));
+    } catch (e) { /* storage full or blocked: the card still works without a saved copy */ }
+  }
+
+  function loadReport(args) {
+    var store = storage();
+    if (!store || !args) return null;
+    try { return JSON.parse(store.getItem(argsKey(args)) || "null"); } catch (e) { return null; }
+  }
+
+  function show(data) {
+    clearTimeout(waitTimer);
+    state.card = data;
+    render();
+    saveReport(state.args, data);
+  }
+
+  function showProblem(detail) {
+    clearTimeout(waitTimer);
+    var waiting = document.getElementById("waiting");
+    var short = detail.length > 220 ? detail.slice(0, 219) + "…" : detail;
+    waiting.textContent = "The report could not be built." + (short ? " " + short : "") + " Ask Claude to try again.";
+    waiting.classList.remove("hidden");
+    document.getElementById("card").classList.add("hidden");
+  }
+
+  function reloadFromServer(button) {
+    button.textContent = "Loading…";
+    request("tools/call", { name: "reload_report", arguments: { original_arguments: state.args } })
+      .then(function (result) {
+        var data = reportFrom(result);
+        if (data) show(data);
+        else showProblem(firstText(result && result.content) || "The report could not be rebuilt.");
+      })
+      .catch(function (err) {
+        showProblem((err && err.message) || "This app did not let the card reload its data.");
+      });
+  }
+
+  function showWaitingHelp() {
+    if (state.card) return;
+    var waiting = document.getElementById("waiting");
+    waiting.replaceChildren();
+    waiting.appendChild(el("p", null, "The report's data has not arrived. This can happen when a chat is reopened after the app restarts."));
+    if (state.args) {
+      var load = el("button", null, "Load report");
+      load.addEventListener("click", function () { reloadFromServer(load); });
+      waiting.appendChild(load);
+    } else {
+      waiting.appendChild(el("p", null, "Ask Claude to show the report again."));
+    }
+    waiting.appendChild(el("p", "muted", "Received from the app: " + (seen.length ? seen.join(", ") : "nothing")));
+  }
+
+  window.addEventListener("message", function (event) {
+    var msg = event.data;
+    if (!msg || msg.jsonrpc !== "2.0") return;
+    if (msg.id !== undefined && pending[msg.id]) {
+      var p = pending[msg.id];
+      delete pending[msg.id];
+      if (msg.error) p.reject(msg.error); else p.resolve(msg.result);
+      return;
+    }
+    if (msg.method) {
+      var name = msg.method.replace("ui/notifications/", "");
+      if (seen.indexOf(name) < 0) seen.push(name);
+    }
+    if (msg.method === "ui/notifications/tool-input-partial") {
+      showProgress(msg.params && msg.params.arguments);
+    } else if (msg.method === "ui/notifications/tool-input" && msg.params) {
+      state.args = msg.params.arguments || null;
+      if (!state.card) document.getElementById("waiting").textContent = "Rating…";
+      restartWaitTimer(QUIET_MS);
+      if (!state.card) {
+        var cached = loadReport(state.args);
+        if (cached) show(cached);
+      }
+    } else if (msg.method === "ui/notifications/tool-result" && msg.params) {
+      var data = reportFrom(msg.params);
+      if (data) show(data);
+      else if (msg.params.isError) showProblem(firstText(msg.params.content));
+    } else if (msg.method === "ui/notifications/tool-cancelled") {
+      showProblem("The request was cancelled.");
+    } else if (msg.method === "ui/notifications/host-context-changed" && msg.params) {
+      if (msg.params.theme) applyTheme(msg.params.theme);
+    }
+  });
+
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () {
+      notify("ui/notifications/size-changed", { height: Math.ceil(document.body.getBoundingClientRect().height) + 2 });
+    }).observe(document.body);
+  }
+
+  function initialized() {
+    notify("ui/notifications/initialized", {});
+    restartWaitTimer(WAIT_MS);
+  }
+
+  applyTheme(null);
+  request("ui/initialize", {
+    protocolVersion: PROTOCOL_VERSION,
+    appInfo: { name: "Dispute Clause Analyzer report card", version: "0.3.0" },
+    appCapabilities: {}
+  }).then(function (result) {
+    var ctx = (result && result.hostContext) || {};
+    applyTheme(ctx.theme || null);
+    initialized();
+  }).catch(initialized);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+Disclaimer - This tool provides preliminary informational analysis only and does not constitute legal advice or a legal opinion. It does not replace review by a qualified legal professional. Please consult your legal advisor to review the clause in light of the applicable laws, jurisdiction and specific circumstances before relying on or executing it.

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dispute-clause-analyzer"
+version = "0.1.0"
+description = "MCP server that rates dispute resolution clauses on Presolv360's 5-point scale"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = ["mcp>=2.3,<3", "reportlab>=4,<5"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov>=5"]
+
+[project.scripts]
+dispute-clause-analyzer = "dispute_clause_analyzer.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+dispute_clause_analyzer = ["rules/*.json", "rules/*.md", "ui/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=dispute_clause_analyzer --cov-report=term-missing"

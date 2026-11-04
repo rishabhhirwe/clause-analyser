@@ -1,0 +1,18 @@
+{
+  "_about": "Expected ratings for the test clauses. The clauses are made up for testing: they copy the wording patterns of real dispute clauses, but name no real lender. Each type follows Presolv360's rating scale; a clause with more than one way of picking the arbitrator gets the average of its parts ('type': 'mixed', with 'parts').",
+  "clauses": [
+    {"id": "presolv360_named", "type": "presolv360", "rating": 5},
+    {"id": "presolv360_short", "type": "presolv360", "rating": 5},
+    {"id": "presolv360_or_named_odr", "type": "presolv360", "rating": 5},
+    {"id": "mixed_presolv360_and_any_odr", "type": "mixed", "rating": 4.5, "parts": ["presolv360", "odr"]},
+    {"id": "odr_unnamed", "type": "odr", "rating": 4},
+    {"id": "mixed_unilateral_and_odr", "type": "mixed", "rating": 3, "parts": ["odr", "unilateral"]},
+    {"id": "institution_recognised", "type": "institutional", "rating": 3},
+    {"id": "institution_government", "type": "institutional", "rating": 3},
+    {"id": "mutual_consent_scanned", "type": "mutual_consent", "rating": 3},
+    {"id": "mutual_consent_online_hearings", "type": "mutual_consent", "rating": 3},
+    {"id": "mutual_consent_lender_three_names", "type": "mutual_consent", "rating": 3},
+    {"id": "unilateral_lender_nominates", "type": "unilateral", "rating": 2},
+    {"id": "unilateral_sole_arbitrator", "type": "unilateral", "rating": 2}
+  ]
+}
