@@ -47,5 +47,7 @@ def test_claude_code_plugin_and_marketplace_point_at_this_repo():
     assert market["plugins"][0]["name"] == "clause-analyser" and market["plugins"][0]["source"] == "./"
 
 
-def test_build_output_is_kept_out_of_git():
-    assert "dist/" in (ROOT / ".gitignore").read_text().split()
+def test_only_the_extension_file_is_committed_from_dist():
+    rules = (ROOT / ".gitignore").read_text().split()
+
+    assert "dist/*" in rules and "!dist/Clause-Analyser.mcpb" in rules

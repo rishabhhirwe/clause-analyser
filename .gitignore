@@ -5,4 +5,5 @@ __pycache__/
 .pytest_cache/
 _session-files/
 .DS_Store
-dist/
+dist/*
+!dist/Clause-Analyser.mcpb
