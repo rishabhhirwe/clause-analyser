@@ -13,6 +13,7 @@
     "url": "https://github.com/rishabhhirwe/clause-analyser"
   },
   "homepage": "https://github.com/rishabhhirwe/clause-analyser",
+  "icon": "icon.png",
   "server": {
     "type": "binary",
     "entry_point": "server/clause-analyser",

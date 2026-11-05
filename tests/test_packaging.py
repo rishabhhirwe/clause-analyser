@@ -27,7 +27,7 @@ def test_extension_holds_the_programs_and_nothing_private(tmp_path, programs):
     names = archive.namelist()
 
     assert bundle.name == "Clause-Analyser.mcpb"
-    assert sorted(names) == ["LICENSE", "README.md", "manifest.json", "server/clause-analyser", "server/clause-analyser.exe"]
+    assert sorted(names) == ["LICENSE", "README.md", "icon.png", "manifest.json", "server/clause-analyser", "server/clause-analyser.exe"]
     assert archive.read("server/clause-analyser") == b"mac program"
 
 
@@ -77,3 +77,16 @@ def test_only_the_extension_file_is_committed_from_dist():
 
 def test_the_terminal_plugin_is_gone():
     assert not (ROOT / ".claude-plugin").exists()
+
+
+def test_extension_shows_the_presolv360_icon(tmp_path, programs):
+    import io
+
+    from PIL import Image
+
+    archive = zipfile.ZipFile(build(tmp_path / "out", programs))
+    manifest = json.loads(archive.read("manifest.json"))
+    icon = Image.open(io.BytesIO(archive.read("icon.png")))
+
+    assert manifest["icon"] == "icon.png"
+    assert icon.format == "PNG" and icon.width == icon.height >= 512

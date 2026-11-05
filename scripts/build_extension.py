@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE_NAME = "Clause-Analyser.mcpb"
 TOP_LEVEL_FILES = ("LICENSE", "README.md")
+ICON = "icon.png"  # the Presolv360 mark, shown next to the extension in Claude
 RUNNABLE = 0o755 << 16  # the Mac program must keep its permission to run
 
 
@@ -42,6 +43,7 @@ def build(out_dir: Path = ROOT / "dist", programs_dir: Path = ROOT / "dist-bin")
         archive.writestr("manifest.json", _manifest())
         for name in TOP_LEVEL_FILES:
             archive.write(ROOT / name, name)
+        archive.write(ROOT / "extension" / ICON, ICON)
         for program in programs:
             info = zipfile.ZipInfo(f"server/{program.name}")
             info.external_attr = RUNNABLE
