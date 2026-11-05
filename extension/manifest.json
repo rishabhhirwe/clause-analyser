@@ -14,27 +14,55 @@
   },
   "homepage": "https://github.com/rishabhhirwe/clause-analyser",
   "server": {
-    "type": "uv",
-    "entry_point": "src/dispute_clause_analyzer/server.py",
+    "type": "binary",
+    "entry_point": "server/clause-analyser",
     "mcp_config": {
-      "command": "uv",
-      "args": ["run", "--directory", "${__dirname}", "dispute-clause-analyzer"]
+      "command": "${__dirname}/server/clause-analyser",
+      "args": [],
+      "platform_overrides": {
+        "win32": {
+          "command": "${__dirname}/server/clause-analyser.exe"
+        }
+      }
     }
   },
   "tools": [
-    {"name": "rate_clause", "description": "Rate a dispute resolution clause out of 5"},
-    {"name": "show_report_card", "description": "Show the visual report card for one agreement"},
-    {"name": "show_portfolio", "description": "Show the dashboard for several agreements"},
-    {"name": "suggest_better_clause", "description": "Suggest wording that raises the rating"},
-    {"name": "save_report_pdf", "description": "Save a PDF report for one agreement"},
-    {"name": "save_portfolio_pdf", "description": "Save one PDF report for several agreements"}
+    {
+      "name": "rate_clause",
+      "description": "Rate a dispute resolution clause out of 5"
+    },
+    {
+      "name": "show_report_card",
+      "description": "Show the visual report card for one agreement"
+    },
+    {
+      "name": "show_portfolio",
+      "description": "Show the dashboard for several agreements"
+    },
+    {
+      "name": "suggest_better_clause",
+      "description": "Suggest wording that raises the rating"
+    },
+    {
+      "name": "save_report_pdf",
+      "description": "Save a PDF report for one agreement"
+    },
+    {
+      "name": "save_portfolio_pdf",
+      "description": "Save one PDF report for several agreements"
+    }
   ],
   "compatibility": {
-    "platforms": ["darwin", "win32", "linux"],
-    "runtimes": {
-      "python": ">=3.10"
-    }
+    "platforms": [
+      "darwin",
+      "win32"
+    ]
   },
-  "keywords": ["arbitration", "dispute resolution", "contracts", "legal"],
+  "keywords": [
+    "arbitration",
+    "dispute resolution",
+    "contracts",
+    "legal"
+  ],
   "license": "MIT"
 }

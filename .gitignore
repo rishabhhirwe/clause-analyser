@@ -7,3 +7,5 @@ _session-files/
 .DS_Store
 dist/*
 !dist/Clause-Analyser.mcpb
+dist-bin/
+build/

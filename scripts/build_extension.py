@@ -1,7 +1,7 @@
-"""Builds the Claude Desktop extension file (dist/Clause-Analyser.mcpb) from the project.
+"""Builds the Claude Desktop extension file (dist/Clause-Analyser.mcpb).
 
-Run: .venv/bin/python -m scripts.build_extension
-The bundle holds only what the tool needs to run; tests, local files and caches are left out.
+The extension holds a self-contained program for each type of computer (see build_binary.py), so the
+user installs nothing else. Run: .venv/bin/python -m scripts.build_extension [out_dir] [programs_dir]
 """
 from __future__ import annotations
 
@@ -13,8 +13,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BUNDLE_NAME = "Clause-Analyser.mcpb"
-TOP_LEVEL_FILES = ("pyproject.toml", "LICENSE", "README.md")
-SKIPPED_PARTS = ("__pycache__", ".egg-info")
+TOP_LEVEL_FILES = ("LICENSE", "README.md")
+RUNNABLE = 0o755 << 16  # the Mac program must keep its permission to run
 
 
 def _version() -> str:
@@ -26,25 +26,30 @@ def _manifest() -> str:
     return json.dumps({**manifest, "version": _version()}, indent=2) + "\n"
 
 
-def _source_files() -> list[Path]:
-    return sorted(
-        path for path in (ROOT / "src").rglob("*")
-        if path.is_file() and not any(part in str(path) for part in SKIPPED_PARTS)
-    )
+def _programs(programs_dir: Path) -> list[Path]:
+    found = sorted(path for path in programs_dir.glob("clause-analyser*") if path.is_file())
+    if not found:
+        raise FileNotFoundError(f"No program found in {programs_dir}. Build one first with scripts.build_binary.")
+    return found
 
 
-def build(out_dir: Path = ROOT / "dist") -> Path:
+def build(out_dir: Path = ROOT / "dist", programs_dir: Path = ROOT / "dist-bin") -> Path:
     """Write the extension file into out_dir and return its path."""
+    programs = _programs(programs_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     bundle = out_dir / BUNDLE_NAME
     with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("manifest.json", _manifest())
         for name in TOP_LEVEL_FILES:
             archive.write(ROOT / name, name)
-        for path in _source_files():
-            archive.write(path, path.relative_to(ROOT).as_posix())
+        for program in programs:
+            info = zipfile.ZipInfo(f"server/{program.name}")
+            info.external_attr = RUNNABLE
+            info.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(info, program.read_bytes())
     return bundle
 
 
 if __name__ == "__main__":
-    print(build(Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "dist"))
+    args = [Path(a) for a in sys.argv[1:]]
+    print(build(*args))
