@@ -7,11 +7,11 @@ import pytest
 from dispute_clause_analyzer.classifier import classify
 
 FIXTURES = Path(__file__).parent / "fixtures"
-ANSWER_KEY = json.loads((FIXTURES / "answer_key.json").read_text())["clauses"]
+ANSWER_KEY = json.loads((FIXTURES / "answer_key.json").read_text(encoding="utf-8"))["clauses"]
 
 
 def load_clause(clause_id: str) -> str:
-    return (FIXTURES / "clauses" / f"{clause_id}.txt").read_text()
+    return (FIXTURES / "clauses" / f"{clause_id}.txt").read_text(encoding="utf-8")
 
 
 @pytest.mark.parametrize("case", ANSWER_KEY, ids=[c["id"] for c in ANSWER_KEY])

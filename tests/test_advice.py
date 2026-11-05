@@ -12,7 +12,7 @@ RULES = load_rulebook()
 
 
 def clause(clause_id: str) -> str:
-    return (CLAUSES / f"{clause_id}.txt").read_text()
+    return (CLAUSES / f"{clause_id}.txt").read_text(encoding="utf-8")
 
 
 def test_unilateral_path_climbs_through_each_rating_once():

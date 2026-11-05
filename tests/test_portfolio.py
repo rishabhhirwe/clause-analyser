@@ -7,7 +7,7 @@ import pytest
 from dispute_clause_analyzer.portfolio import MAX_AGREEMENTS, AgreementInput, build_portfolio
 
 FIXTURES = Path(__file__).parent / "fixtures"
-ANSWER_KEY = json.loads((FIXTURES / "answer_key.json").read_text())["clauses"]
+ANSWER_KEY = json.loads((FIXTURES / "answer_key.json").read_text(encoding="utf-8"))["clauses"]
 AGREEMENT_IDS = [c["id"] for c in ANSWER_KEY]
 
 
@@ -16,7 +16,7 @@ def agreement(clause_id: str, **overrides) -> AgreementInput:
         "file_name": f"{clause_id}.pdf",
         "lender": "Lender",
         "clause_reference": "Clause 1",
-        "clause_text": (FIXTURES / "clauses" / f"{clause_id}.txt").read_text(),
+        "clause_text": (FIXTURES / "clauses" / f"{clause_id}.txt").read_text(encoding="utf-8"),
         "deciding_quote": "",
         "who_picks": "Someone",
         "seat_venue": "Somewhere",
@@ -140,7 +140,7 @@ def test_too_many_agreements_are_rejected():
 
 
 def test_only_the_file_name_and_clause_are_required():
-    minimal = AgreementInput(file_name="scan.pdf", clause_text=(FIXTURES / "clauses" / "odr_unnamed.txt").read_text())
+    minimal = AgreementInput(file_name="scan.pdf", clause_text=(FIXTURES / "clauses" / "odr_unnamed.txt").read_text(encoding="utf-8"))
 
     item = build_portfolio([minimal])["items"][0]
 

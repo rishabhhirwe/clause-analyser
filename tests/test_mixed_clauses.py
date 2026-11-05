@@ -43,18 +43,18 @@ def test_mixed_type_is_the_weakest_part_so_advice_fixes_it():
 
 
 def test_notwithstanding_no_longer_lets_one_part_win():
-    assert classify((CLAUSES / "mixed_unilateral_and_odr.txt").read_text()).rating == 3
+    assert classify((CLAUSES / "mixed_unilateral_and_odr.txt").read_text(encoding="utf-8")).rating == 3
 
 
 def test_presolv360_or_cord_is_one_way_and_stays_five():
-    result = classify((CLAUSES / "presolv360_or_named_odr.txt").read_text())
+    result = classify((CLAUSES / "presolv360_or_named_odr.txt").read_text(encoding="utf-8"))
 
     assert (result.rating, result.mixed) == (5, False)
 
 
 def test_whole_ratings_stay_whole_numbers():
     assert isinstance(classify(UNILATERAL_AND_ODR).rating, int)
-    assert isinstance(classify((CLAUSES / "odr_unnamed.txt").read_text()).rating, int)
+    assert isinstance(classify((CLAUSES / "odr_unnamed.txt").read_text(encoding="utf-8")).rating, int)
 
 
 def test_card_shows_the_average_and_each_part():
@@ -77,7 +77,7 @@ def test_card_recommends_a_straightforward_unambiguous_clause():
 
 
 def test_single_type_card_has_one_part_and_no_mixed_advice():
-    result = card((CLAUSES / "unilateral_lender_nominates.txt").read_text())
+    result = card((CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8"))
 
     assert result["parts"] == [{"type": "unilateral", "label": "Unilateral", "rating": 2}]
     assert result["label"] == "Unilateral"

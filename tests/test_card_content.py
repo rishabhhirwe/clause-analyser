@@ -21,7 +21,7 @@ WARNING_TEXT = (
 
 def card(clause_id: str, **facts) -> dict:
     return build_report_card(
-        clause_text=(CLAUSES / f"{clause_id}.txt").read_text(),
+        clause_text=(CLAUSES / f"{clause_id}.txt").read_text(encoding="utf-8"),
         deciding_quote="",
         clause_reference=facts.pop("clause_reference", "Clause 1"),
         who_picks=facts.pop("who_picks", "Someone"),
@@ -86,7 +86,7 @@ def test_low_rating_card_has_no_key_takeaways():
 
 
 def test_card_and_portfolio_use_the_approved_disclaimer():
-    agreements = [AgreementInput(file_name="a.pdf", clause_text=(CLAUSES / "odr_unnamed.txt").read_text())]
+    agreements = [AgreementInput(file_name="a.pdf", clause_text=(CLAUSES / "odr_unnamed.txt").read_text(encoding="utf-8"))]
 
     assert card("odr_unnamed")["disclaimer"] == RULES.disclaimer
     assert build_portfolio(agreements)["disclaimer"] == RULES.disclaimer
@@ -94,7 +94,7 @@ def test_card_and_portfolio_use_the_approved_disclaimer():
 
 def test_portfolio_items_carry_seat_risk_and_takeaways():
     agreement = AgreementInput(
-        file_name="p360.pdf", clause_text=(CLAUSES / "presolv360_named.txt").read_text(),
+        file_name="p360.pdf", clause_text=(CLAUSES / "presolv360_named.txt").read_text(encoding="utf-8"),
         seat="Bengaluru", venue="Online", place_of_execution="Bengaluru",
     )
 

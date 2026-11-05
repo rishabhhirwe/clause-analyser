@@ -36,7 +36,7 @@ def test_reload_report_is_only_visible_to_the_card_not_to_claude():
 
 
 def test_reload_report_rebuilds_a_portfolio_from_the_original_arguments():
-    clause = (CLAUSES / "unilateral_lender_nominates.txt").read_text()
+    clause = (CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")
     original = {"agreements": [{"file_name": "UNILATERAL.pdf", "clause_text": clause}]}
 
     result = asyncio.run(server.call_tool("reload_report", {"original_arguments": original}))
@@ -46,7 +46,7 @@ def test_reload_report_rebuilds_a_portfolio_from_the_original_arguments():
 
 
 def test_reload_report_rebuilds_a_single_card_from_the_original_arguments():
-    clause = (CLAUSES / "odr_unnamed.txt").read_text()
+    clause = (CLAUSES / "odr_unnamed.txt").read_text(encoding="utf-8")
 
     result = asyncio.run(server.call_tool("reload_report", {"original_arguments": {"clause_text": clause}}))
 
@@ -67,7 +67,7 @@ def test_portfolio_tool_shares_the_card_ui():
 def test_show_portfolio_rates_every_agreement():
     agreements = [
         {"file_name": f"{name}.pdf", "lender": "L", "clause_reference": "Cl. 1",
-         "clause_text": (CLAUSES / f"{name}.txt").read_text(), "deciding_quote": "", "who_picks": "x",
+         "clause_text": (CLAUSES / f"{name}.txt").read_text(encoding="utf-8"), "deciding_quote": "", "who_picks": "x",
          "seat_venue": "y", "note": ""}
         for name in ("unilateral_lender_nominates", "odr_unnamed", "presolv360_named")
     ]
@@ -93,7 +93,7 @@ def test_report_card_tool_is_linked_to_the_card_ui():
 
 
 def test_show_report_card_returns_card_data_and_says_whether_it_was_shown():
-    clause = (CLAUSES / "unilateral_lender_nominates.txt").read_text()
+    clause = (CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")
     args = {
         "clause_text": clause,
         "deciding_quote": "nominated/ appointed by the Lender",
@@ -121,7 +121,7 @@ def test_server_instructions_require_the_personal_data_warning():
 
 
 def test_rate_clause_returns_rating_reason_and_warning():
-    clause = (CLAUSES / "unilateral_lender_nominates.txt").read_text()
+    clause = (CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")
 
     out = call("rate_clause", {"clause_text": clause})
 
@@ -133,7 +133,7 @@ def test_rate_clause_returns_rating_reason_and_warning():
 
 
 def test_rate_clause_flags_when_claude_picked_a_different_type():
-    clause = (CLAUSES / "mutual_consent_lender_three_names.txt").read_text()
+    clause = (CLAUSES / "mutual_consent_lender_three_names.txt").read_text(encoding="utf-8")
 
     out = call("rate_clause", {"clause_text": clause, "claimed_type": "unilateral"})
 
@@ -143,7 +143,7 @@ def test_rate_clause_flags_when_claude_picked_a_different_type():
 
 
 def test_rate_clause_flags_quote_not_found_in_clause():
-    clause = (CLAUSES / "presolv360_named.txt").read_text()
+    clause = (CLAUSES / "presolv360_named.txt").read_text(encoding="utf-8")
 
     out = call("rate_clause", {"clause_text": clause, "deciding_quote": "appointed by the Lender"})
 
@@ -153,7 +153,7 @@ def test_rate_clause_flags_quote_not_found_in_clause():
 
 @pytest.mark.parametrize("claimed", ["ODR", "odr", "Odr"])
 def test_claimed_type_is_matched_regardless_of_case(claimed):
-    clause = (CLAUSES / "odr_unnamed.txt").read_text()
+    clause = (CLAUSES / "odr_unnamed.txt").read_text(encoding="utf-8")
 
     out = call("rate_clause", {"clause_text": clause, "claimed_type": claimed})
 
@@ -161,7 +161,7 @@ def test_claimed_type_is_matched_regardless_of_case(claimed):
 
 
 def test_claimed_type_accepts_the_label_form():
-    clause = (CLAUSES / "mutual_consent_scanned.txt").read_text()
+    clause = (CLAUSES / "mutual_consent_scanned.txt").read_text(encoding="utf-8")
 
     out = call("rate_clause", {"clause_text": clause, "claimed_type": "Mutual consent"})
 
@@ -173,7 +173,7 @@ def test_rate_clause_rejects_unknown_claimed_type():
 
 
 def test_rate_clause_accepts_quote_with_different_spacing():
-    clause = (CLAUSES / "presolv360_named.txt").read_text()
+    clause = (CLAUSES / "presolv360_named.txt").read_text(encoding="utf-8")
     quote = "administered electronically by   Presolv360"
 
     out = call("rate_clause", {"clause_text": clause, "deciding_quote": quote})
@@ -246,7 +246,7 @@ def test_rate_clause_with_unknown_wording_asks_for_review():
 
 
 def test_rate_clause_reports_the_parts_of_a_mixed_clause():
-    clause = (CLAUSES / "mixed_unilateral_and_odr.txt").read_text()
+    clause = (CLAUSES / "mixed_unilateral_and_odr.txt").read_text(encoding="utf-8")
 
     out = call("rate_clause", {"clause_text": clause})
 
@@ -261,7 +261,7 @@ def test_suggest_better_clause_rejects_unknown_type():
 
 
 def test_show_portfolio_accepts_agreements_with_unreadable_details():
-    clause = (CLAUSES / "mutual_consent_scanned.txt").read_text()
+    clause = (CLAUSES / "mutual_consent_scanned.txt").read_text(encoding="utf-8")
     agreements = [{"file_name": "Mutual Consent.pdf", "clause_text": clause, "lender": None}]
 
     result = asyncio.run(server.call_tool("show_portfolio", {"agreements": agreements}))
@@ -270,7 +270,7 @@ def test_show_portfolio_accepts_agreements_with_unreadable_details():
 
 
 def test_show_report_card_accepts_just_the_clause():
-    clause = (CLAUSES / "unilateral_lender_nominates.txt").read_text()
+    clause = (CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")
 
     result = asyncio.run(server.call_tool("show_report_card", {"clause_text": clause}))
 
@@ -279,7 +279,7 @@ def test_show_report_card_accepts_just_the_clause():
 
 
 def test_show_report_card_uses_seat_or_place_of_execution_and_ignores_venue():
-    clause = (CLAUSES / "institution_recognised.txt").read_text()
+    clause = (CLAUSES / "institution_recognised.txt").read_text(encoding="utf-8")
     args = {"clause_text": clause, "seat": "Bangalore", "venue": "Not stated", "place_of_execution": "Bangalore (Exhibit A)"}
 
     facts = asyncio.run(server.call_tool("show_report_card", args)).structured_content["facts"]
@@ -297,7 +297,7 @@ def test_pdf_tools_exist_and_the_card_one_is_hidden_from_claude():
 
 def test_save_report_pdf_writes_the_file_to_the_download_folder(tmp_path, monkeypatch):
     monkeypatch.setenv("CLAUSE_ANALYSER_DOWNLOAD_DIR", str(tmp_path))
-    clause = (CLAUSES / "unilateral_lender_nominates.txt").read_text()
+    clause = (CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")
 
     out = call("save_report_pdf", {"clause_text": clause, "title": "UNILATERAL.pdf", "seat": "Kolkata"})
 
@@ -309,7 +309,7 @@ def test_save_report_pdf_writes_the_file_to_the_download_folder(tmp_path, monkey
 
 def test_download_report_pdf_returns_the_file_for_the_card(tmp_path, monkeypatch):
     monkeypatch.setenv("CLAUSE_ANALYSER_DOWNLOAD_DIR", str(tmp_path))
-    clause = (CLAUSES / "presolv360_named.txt").read_text()
+    clause = (CLAUSES / "presolv360_named.txt").read_text(encoding="utf-8")
 
     out = call("download_report_pdf", {"original_arguments": {"clause_text": clause}, "title": "p360.pdf"})
 
@@ -321,8 +321,8 @@ def test_download_report_pdf_returns_the_file_for_the_card(tmp_path, monkeypatch
 def test_download_report_pdf_makes_a_portfolio_pdf_for_the_dashboard(tmp_path, monkeypatch):
     monkeypatch.setenv("CLAUSE_ANALYSER_DOWNLOAD_DIR", str(tmp_path))
     original = {"agreements": [
-        {"file_name": "UNILATERAL.pdf", "clause_text": (CLAUSES / "unilateral_lender_nominates.txt").read_text()},
-        {"file_name": "odr clause.pdf", "clause_text": (CLAUSES / "odr_unnamed.txt").read_text()},
+        {"file_name": "UNILATERAL.pdf", "clause_text": (CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")},
+        {"file_name": "odr clause.pdf", "clause_text": (CLAUSES / "odr_unnamed.txt").read_text(encoding="utf-8")},
     ]}
 
     out = call("download_report_pdf", {"original_arguments": original})
@@ -333,8 +333,8 @@ def test_download_report_pdf_makes_a_portfolio_pdf_for_the_dashboard(tmp_path, m
 
 def test_save_portfolio_pdf_saves_one_file_for_all_agreements(tmp_path, monkeypatch):
     monkeypatch.setenv("CLAUSE_ANALYSER_DOWNLOAD_DIR", str(tmp_path))
-    agreements = [{"file_name": "p360.pdf", "clause_text": (CLAUSES / "presolv360_named.txt").read_text()},
-                  {"file_name": "UNILATERAL.pdf", "clause_text": (CLAUSES / "unilateral_lender_nominates.txt").read_text()}]
+    agreements = [{"file_name": "p360.pdf", "clause_text": (CLAUSES / "presolv360_named.txt").read_text(encoding="utf-8")},
+                  {"file_name": "UNILATERAL.pdf", "clause_text": (CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")}]
 
     out = call("save_portfolio_pdf", {"agreements": agreements})
 
@@ -344,7 +344,7 @@ def test_save_portfolio_pdf_saves_one_file_for_all_agreements(tmp_path, monkeypa
 
 def test_saving_twice_keeps_both_files(tmp_path, monkeypatch):
     monkeypatch.setenv("CLAUSE_ANALYSER_DOWNLOAD_DIR", str(tmp_path))
-    args = {"clause_text": (CLAUSES / "odr_unnamed.txt").read_text(), "title": "odr.pdf"}
+    args = {"clause_text": (CLAUSES / "odr_unnamed.txt").read_text(encoding="utf-8"), "title": "odr.pdf"}
 
     first = call("save_report_pdf", args)["saved_to"]
     second = call("save_report_pdf", args)["saved_to"]
@@ -355,7 +355,7 @@ def test_saving_twice_keeps_both_files(tmp_path, monkeypatch):
 
 def test_card_download_can_also_save_when_asked(tmp_path, monkeypatch):
     monkeypatch.setenv("CLAUSE_ANALYSER_DOWNLOAD_DIR", str(tmp_path))
-    original = {"clause_text": (CLAUSES / "odr_unnamed.txt").read_text()}
+    original = {"clause_text": (CLAUSES / "odr_unnamed.txt").read_text(encoding="utf-8")}
 
     out = call("download_report_pdf", {"original_arguments": original, "title": "odr.pdf", "save": True})
 
@@ -366,7 +366,7 @@ def test_save_report_pdf_fails_clearly_when_the_folder_cannot_be_written(tmp_pat
     blocker = tmp_path / "not-a-folder"
     blocker.write_text("x")
     monkeypatch.setenv("CLAUSE_ANALYSER_DOWNLOAD_DIR", str(blocker / "inside"))
-    args = {"clause_text": (CLAUSES / "odr_unnamed.txt").read_text()}
+    args = {"clause_text": (CLAUSES / "odr_unnamed.txt").read_text(encoding="utf-8")}
 
     assert_clear_tool_error("save_report_pdf", args, "Could not save the PDF")
 
@@ -378,7 +378,7 @@ def test_download_report_pdf_explains_unreadable_agreements():
 
 def test_save_portfolio_pdf_reports_when_it_cannot_save(monkeypatch):
     monkeypatch.setattr(server_module, "_save_pdf", lambda pdf, name: None)
-    agreements = [{"clause_text": (CLAUSES / "unilateral_lender_nominates.txt").read_text()}]
+    agreements = [{"clause_text": (CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")}]
 
     assert_clear_tool_error("save_portfolio_pdf", {"agreements": agreements}, "Could not save the PDF")
 

@@ -5,7 +5,7 @@ from dispute_clause_analyzer.portfolio import AgreementInput, build_portfolio
 from dispute_clause_analyzer.rulebook import load_rulebook
 
 CLAUSES = Path(__file__).parent / "fixtures" / "clauses"
-GOOD = (CLAUSES / "unilateral_lender_nominates.txt").read_text()
+GOOD = (CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")
 
 
 def test_a_bad_file_in_a_bulk_upload_becomes_a_not_rated_row_with_its_reason():
@@ -42,4 +42,4 @@ def test_instructions_say_what_to_do_with_bad_documents():
 def test_nothing_says_the_tool_is_only_for_loan_agreements():
     root = Path(__file__).parents[1]
     for path in ("AGENTS.md", "README.md", ".claude/skills/rate-clause/SKILL.md"):
-        assert "loan agreements" not in (root / path).read_text(), path
+        assert "loan agreements" not in (root / path).read_text(encoding="utf-8"), path

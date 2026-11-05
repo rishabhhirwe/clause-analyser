@@ -11,7 +11,7 @@ CLAUSES = Path(__file__).parent / "fixtures" / "clauses"
 
 
 def text(clause_id: str) -> str:
-    return (CLAUSES / f"{clause_id}.txt").read_text()
+    return (CLAUSES / f"{clause_id}.txt").read_text(encoding="utf-8")
 
 
 def card(clause_id: str, quote: str = "") -> dict:

@@ -19,11 +19,11 @@ RUNNABLE = 0o755 << 16  # the Mac program must keep its permission to run
 
 
 def _version() -> str:
-    return tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
+    return tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
 
 
 def _manifest() -> str:
-    manifest = json.loads((ROOT / "extension" / "manifest.json").read_text())
+    manifest = json.loads((ROOT / "extension" / "manifest.json").read_text(encoding="utf-8"))
     return json.dumps({**manifest, "version": _version()}, indent=2) + "\n"
 
 

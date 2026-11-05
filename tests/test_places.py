@@ -62,6 +62,6 @@ def test_card_html_draws_the_fact_rows_without_a_venue_fallback():
 
 
 def test_rules_tell_claude_to_find_only_the_seat_or_place_of_execution():
-    instructions = (Path(__file__).parents[1] / "src" / "dispute_clause_analyzer" / "rules" / "instructions.md").read_text()
+    instructions = (Path(__file__).parents[1] / "src" / "dispute_clause_analyzer" / "rules" / "instructions.md").read_text(encoding="utf-8")
 
     assert "`venue`" not in instructions

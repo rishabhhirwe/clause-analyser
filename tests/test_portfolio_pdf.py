@@ -11,7 +11,7 @@ UPLOAD_ORDER = [("p360.pdf", "presolv360_named"), ("UNILATERAL.pdf", "unilateral
 def agreements() -> list[AgreementInput]:
     return [
         AgreementInput(file_name=name, lender="Lender", clause_reference="Cl. 1",
-                       clause_text=(CLAUSES / f"{clause_id}.txt").read_text(), seat="Seat " + name)
+                       clause_text=(CLAUSES / f"{clause_id}.txt").read_text(encoding="utf-8"), seat="Seat " + name)
         for name, clause_id in UPLOAD_ORDER
     ]
 

@@ -9,7 +9,7 @@ import pytest
 from scripts.build_extension import build
 
 ROOT = Path(__file__).parents[1]
-VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
+VERSION = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ def test_building_without_a_program_fails_clearly(tmp_path):
 
 
 def test_github_builds_both_programs_and_the_extension_file():
-    flow = (ROOT / ".github" / "workflows" / "build-extension.yml").read_text()
+    flow = (ROOT / ".github" / "workflows" / "build-extension.yml").read_text(encoding="utf-8")
 
     assert "macos-latest" in flow and "windows-latest" in flow
     assert "scripts.build_binary" in flow and "scripts.build_extension" in flow
@@ -69,7 +69,7 @@ def test_github_builds_both_programs_and_the_extension_file():
 
 
 def test_only_the_extension_file_is_committed_from_dist():
-    rules = (ROOT / ".gitignore").read_text().split()
+    rules = (ROOT / ".gitignore").read_text(encoding="utf-8").split()
 
     assert "dist/*" in rules and "!dist/Clause-Analyser.mcpb" in rules
     assert "dist-bin/" in rules and "build/" in rules

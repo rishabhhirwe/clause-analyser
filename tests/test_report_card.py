@@ -16,7 +16,7 @@ FACTS = {
 
 
 def card_for(clause_id: str, quote: str = "nominated/ appointed by the Lender") -> dict:
-    text = (CLAUSES / f"{clause_id}.txt").read_text()
+    text = (CLAUSES / f"{clause_id}.txt").read_text(encoding="utf-8")
     return build_report_card(clause_text=text, deciding_quote=quote, **FACTS)
 
 
@@ -79,7 +79,7 @@ def test_top_rated_clause_has_no_path():
 
 
 def test_card_says_how_to_tidy_up_a_mixed_clause():
-    text = (CLAUSES / "mixed_unilateral_and_odr.txt").read_text()
+    text = (CLAUSES / "mixed_unilateral_and_odr.txt").read_text(encoding="utf-8")
 
     card = build_report_card(clause_text=text, deciding_quote="", **FACTS)
 
@@ -116,7 +116,7 @@ def test_quote_across_bullet_points_still_counts_as_found():
 
 
 def test_long_fact_text_is_trimmed():
-    text = (CLAUSES / "unilateral_lender_nominates.txt").read_text()
+    text = (CLAUSES / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")
     facts = {**FACTS, "seat_venue": "x" * 500}
 
     card = build_report_card(clause_text=text, deciding_quote="", **facts)

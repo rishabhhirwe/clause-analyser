@@ -5,7 +5,7 @@ from dispute_clause_analyzer.pdf_report import build_report_pdf
 from dispute_clause_analyzer.report_card import build_report_card, load_card_html
 from dispute_clause_analyzer.rulebook import load_rulebook
 
-CLAUSE = (Path(__file__).parent / "fixtures" / "clauses" / "unilateral_lender_nominates.txt").read_text()
+CLAUSE = (Path(__file__).parent / "fixtures" / "clauses" / "unilateral_lender_nominates.txt").read_text(encoding="utf-8")
 
 
 def card() -> dict:
