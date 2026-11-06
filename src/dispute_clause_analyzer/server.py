@@ -227,6 +227,71 @@ def download_report_pdf(original_arguments: dict[str, Any], title: str | None = 
     }
 
 
+def _review_reasons(result: Classification, text: str, claimed: RatingType | None, quote: str | None) -> list[str]:
+    reasons = list(result.review_reasons)
+    if claimed and result.type and claimed.id not in result.detected_types:
+        reasons.append(f"Claude claimed '{claimed.id}' but the wording matches '{result.type}'. Check the deciding sentence.")
+    if quote and not quote_found(quote, text):
+        reasons.append("The deciding quote was not found word for word in the clause text.")
+    return reasons
+
+
+def _reason(result: Classification) -> str:
+    if result.type is None:
+        return "No wording from the rating scale was found in this clause."
+    if result.mixed:
+        parts = " and ".join(f"{p['label']} ({p['rating']}/5)" for p in rating_view(RULES, result)["parts"])
+        return f"The clause has more than one way of picking the arbitrator: {parts}. The rating is the average, {result.rating}/5."
+    rating_type = RULES.type_by_name(result.type)
+    return f"{rating_type.label} ({rating_type.rating}/5): {rating_type.meaning}"
+
+
+@apps.tool(resource_uri=CARD_URI, structured_output=True, **_labels("Rate clause"))
+def rate_clause(
+    clause_text: str,
+    ctx: Context,
+    claimed_type: str | None = None,
+    deciding_quote: str | None = None,
+    clause_reference: str | None = None,
+    who_picks: str | None = None,
+    seat: str | None = None,
+    place_of_execution: str | None = None,
+    online_process: str | None = None,
+    file_name: str | None = None,
+) -> dict[str, Any]:
+    """Rate a dispute resolution clause out of 5 and show the visual report card in the chat.
+
+    clause_text: the full dispute resolution clause, copied exactly as written, including all sub-parts.
+    claimed_type: the type you believe it is (presolv360, odr, institutional, mutual_consent, unilateral).
+    For a clause with more than one way of picking the arbitrator, give the weakest one.
+    deciding_quote: the sentence that decides who picks the arbitrator, copied word for word.
+    clause_reference, who_picks, seat, place_of_execution, online_process, file_name: short facts for the
+    card, as described for show_report_card. Leave out anything you cannot read.
+    If mixed is true, the rating is the average of parts and type is the weakest part (pass it to
+    suggest_better_clause). If card_shown is true, the card is already on screen: do not call
+    show_report_card and do not repeat the card in text.
+    """
+    _check_clause(clause_text)
+    claimed = _known_type(claimed_type) if claimed_type else None
+    result = classify(clause_text, RULES)
+    reasons = _review_reasons(result, clause_text, claimed, deciding_quote)
+    view = rating_view(RULES, result)
+    arguments = {k: v for k, v in locals().items() if k in CARD_FIELDS and v}
+    card = _card_from({**arguments, "clause_text": clause_text})
+    all_reasons = list(dict.fromkeys([*card["review_reasons"], *reasons]))
+    return {
+        **card,
+        "type_label": view["label"] if result.type else None,
+        "mixed": result.mixed,
+        "reason": _reason(result),
+        "needs_review": bool(all_reasons),
+        "review_reasons": all_reasons,
+        "personal_data_warning": RULES.warning,
+        "card_shown": _card_can_show(ctx),
+        "hosted": HOSTED,
+    }
+
+
 PDF_INSTRUCTIONS = read_rule_file("pdf_online.md" if HOSTED else "pdf_local.md").strip()
 PUBLIC_HOST = os.environ.get("PUBLIC_HOST", "").strip()
 ICON_PATH = "/icon.png"  # served by web.py; the extension file carries its own copy
@@ -250,25 +315,6 @@ server = MCPServer(
 )
 
 
-def _review_reasons(result: Classification, text: str, claimed: RatingType | None, quote: str | None) -> list[str]:
-    reasons = list(result.review_reasons)
-    if claimed and result.type and claimed.id not in result.detected_types:
-        reasons.append(f"Claude claimed '{claimed.id}' but the wording matches '{result.type}'. Check the deciding sentence.")
-    if quote and not quote_found(quote, text):
-        reasons.append("The deciding quote was not found word for word in the clause text.")
-    return reasons
-
-
-def _reason(result: Classification) -> str:
-    if result.type is None:
-        return "No wording from the rating scale was found in this clause."
-    if result.mixed:
-        parts = " and ".join(f"{p['label']} ({p['rating']}/5)" for p in rating_view(RULES, result)["parts"])
-        return f"The clause has more than one way of picking the arbitrator: {parts}. The rating is the average, {result.rating}/5."
-    rating_type = RULES.type_by_name(result.type)
-    return f"{rating_type.label} ({rating_type.rating}/5): {rating_type.meaning}"
-
-
 @server.tool(**_labels("Get rating rules"))
 def get_rating_rules() -> dict[str, Any]:
     """Get Presolv360's rating scale for dispute resolution clauses, the rules for mixed clauses,
@@ -277,37 +323,6 @@ def get_rating_rules() -> dict[str, Any]:
         "version": RULES.version,
         "scale": [{"type": t.id, "label": t.label, "rating": t.rating, "meaning": t.meaning} for t in RULES.types],
         "mixed_clause_rules": list(RULES.mixed_clause_rules),
-        "personal_data_warning": RULES.warning,
-    }
-
-
-@server.tool(**_labels("Rate clause"))
-def rate_clause(clause_text: str, claimed_type: str | None = None, deciding_quote: str | None = None) -> dict[str, Any]:
-    """Rate a dispute resolution clause out of 5.
-
-    clause_text: the full dispute resolution clause, copied exactly as written, including all sub-parts.
-    claimed_type: the type you believe it is (presolv360, odr, institutional, mutual_consent, unilateral).
-    For a clause with more than one way of picking the arbitrator, give the weakest one.
-    deciding_quote: the sentence that decides who picks the arbitrator, copied word for word.
-    If mixed is true, the rating is the average of parts and type is the weakest part (pass it to
-    suggest_better_clause).
-    """
-    _check_clause(clause_text)
-    claimed = _known_type(claimed_type) if claimed_type else None
-    result = classify(clause_text, RULES)
-    reasons = _review_reasons(result, clause_text, claimed, deciding_quote)
-    view = rating_view(RULES, result)
-    return {
-        "rating": result.rating,
-        "out_of": 5,
-        "type": result.type,
-        "type_label": view["label"] if result.type else None,
-        "mixed": result.mixed,
-        "parts": view["parts"],
-        "reason": _reason(result),
-        "matched_wording": list(result.matched_phrases),
-        "needs_review": bool(reasons),
-        "review_reasons": reasons,
         "personal_data_warning": RULES.warning,
     }
 
