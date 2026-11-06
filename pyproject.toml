@@ -22,7 +22,7 @@ clause-analyser-web = "dispute_clause_analyzer.web:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-dispute_clause_analyzer = ["rules/*.json", "rules/*.md", "ui/*.html"]
+dispute_clause_analyzer = ["rules/*.json", "rules/*.md", "ui/*.html", "ui/*.png"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

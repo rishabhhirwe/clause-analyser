@@ -12,6 +12,7 @@ from __future__ import annotations
 import os
 import time
 from collections import deque
+from importlib import resources
 from typing import Callable
 
 from mcp.server.transport_security import TransportSecuritySettings
@@ -23,6 +24,9 @@ from dispute_clause_analyzer import server as tools
 
 MCP_PATH = "/mcp"
 HEALTH_PATH = "/health"
+ICON_PATHS = (tools.ICON_PATH, "/favicon.ico")
+UNLIMITED_PATHS = (HEALTH_PATH, *ICON_PATHS)
+ICON = resources.files("dispute_clause_analyzer").joinpath("ui", "icon.png").read_bytes()
 DEFAULT_RATE_LIMIT = 60
 WINDOW_SECONDS = 60.0
 MAX_SESSIONS = 1000
@@ -34,6 +38,15 @@ LOCAL_HOSTS = ("localhost:*", "127.0.0.1:*")
 async def health(_: Request) -> Response:
     """For the hosting service's health check."""
     return JSONResponse({"status": "ok"})
+
+
+async def icon(_: Request) -> Response:
+    """The Presolv360 icon, shown by Claude next to the connector."""
+    return Response(ICON, media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
+
+
+for _path in ICON_PATHS:
+    tools.server.custom_route(_path, methods=["GET"])(icon)
 
 
 def _client_ip(scope: Scope) -> str:
@@ -65,7 +78,7 @@ class RateLimit:
         return True
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] == "http" and scope["path"] != HEALTH_PATH and not self._allowed(_client_ip(scope)):
+        if scope["type"] == "http" and scope["path"] not in UNLIMITED_PATHS and not self._allowed(_client_ip(scope)):
             busy = JSONResponse({"error": "Too many requests. Please wait a minute and try again."},
                                 status_code=429, headers={"Retry-After": str(int(WINDOW_SECONDS))})
             await busy(scope, receive, send)

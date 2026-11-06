@@ -43,7 +43,7 @@ def build(out_dir: Path = ROOT / "dist", programs_dir: Path = ROOT / "dist-bin")
         archive.writestr("manifest.json", _manifest())
         for name in TOP_LEVEL_FILES:
             archive.write(ROOT / name, name)
-        archive.write(ROOT / "extension" / ICON, ICON)
+        archive.write(ROOT / "src" / "dispute_clause_analyzer" / "ui" / ICON, ICON)
         for program in programs:
             info = zipfile.ZipInfo(f"server/{program.name}")
             info.external_attr = RUNNABLE

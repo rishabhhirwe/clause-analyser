@@ -179,3 +179,21 @@ def test_readme_has_a_privacy_policy():
 
     assert "## Privacy Policy" in readme
     assert "not stored" in readme
+
+
+def test_online_connector_shows_the_presolv360_icon(client):
+    reply = client.post("/mcp", headers=ACCEPT, json={
+        "jsonrpc": "2.0", "id": 1, "method": "initialize",
+        "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "test", "version": "1"}}})
+    info = _message(reply)["result"]["serverInfo"]
+
+    assert info["icons"][0]["src"] == f"https://{HOST}/icon.png"
+    assert info["icons"][0]["mimeType"] == "image/png"
+    for path in ("/icon.png", "/favicon.ico"):
+        image = client.get(path)
+        assert image.status_code == 200 and image.headers["content-type"] == "image/png"
+        assert image.content.startswith(b"\x89PNG")
+
+
+def test_icon_ships_inside_the_package():
+    assert (ROOT / "src" / "dispute_clause_analyzer" / "ui" / "icon.png").read_bytes().startswith(b"\x89PNG")

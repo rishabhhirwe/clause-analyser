@@ -9,7 +9,7 @@ from typing import Any
 from mcp.server.apps import Apps, ResourcePermissions, client_supports_apps
 from mcp.server.mcpserver import Context, MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
-from mcp.types import ToolAnnotations
+from mcp.types import Icon, ToolAnnotations
 
 from dispute_clause_analyzer.classifier import Classification, classify, quote_found
 from dispute_clause_analyzer.pdf_report import build_portfolio_pdf, build_report_pdf, pdf_file_name, portfolio_file_name
@@ -228,12 +228,24 @@ def download_report_pdf(original_arguments: dict[str, Any], title: str | None = 
 
 
 PDF_INSTRUCTIONS = read_rule_file("pdf_online.md" if HOSTED else "pdf_local.md").strip()
+PUBLIC_HOST = os.environ.get("PUBLIC_HOST", "").strip()
+ICON_PATH = "/icon.png"  # served by web.py; the extension file carries its own copy
+
+
+def _icons() -> list[Icon] | None:
+    """The Presolv360 icon Claude shows next to the online connector."""
+    if not (HOSTED and PUBLIC_HOST):
+        return None
+    return [Icon(src=f"https://{PUBLIC_HOST}{ICON_PATH}", mime_type="image/png", sizes=["512x512"])]
+
 
 server = MCPServer(
     name="Dispute Clause Analyzer",
     instructions=(f"{RULES.instructions}\n\n{PDF_INSTRUCTIONS}\n\n"
                   f"Personal information warning to show the user:\n{RULES.warning}"),
     version="0.3.0",
+    icons=_icons(),
+    website_url=f"https://{PUBLIC_HOST}" if HOSTED and PUBLIC_HOST else None,
     extensions=[apps],
 )
 
