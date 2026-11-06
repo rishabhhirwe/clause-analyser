@@ -136,4 +136,5 @@ def build_report_card(
         "path": improvement_path(rules, result.type, result.rating),
         "also": tidy_up(rules, result),
         "disclaimer": rules.disclaimer,
+        "personal_data_warning": rules.warning,
     }

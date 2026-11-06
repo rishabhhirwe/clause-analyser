@@ -22,7 +22,7 @@ When the user shares a contract or clause and asks for a rating:
 When the user shares two or more agreements (or clauses), do not rate them one by one in text. Instead:
 1. Find each agreement's dispute clause, and its seat and place of execution, as above (exactly as written, no corrections).
 2. Call `show_portfolio` once with all of them. Only the clause text is essential. For each agreement also pass, where you can read them: file name, lender, clause reference, deciding quote, who picks the arbitrator, `seat`, `place_of_execution`, and an optional one-line note the rating does not show (for example a DRT carve-out or two seats). Leave out anything you cannot read, such as a lender name in a poor scan; never let one missing detail stop the call. It rates every agreement from the rules, so you do not need `rate_clause` for each.
-3. If `card_shown` is true, write only the warning (first time only) and a one-line summary that includes the biggest recommendation, taken from `summary.actions`: the number of agreements, `summary.average`, the agreements to fix first with the change and `rating_after`, and `summary.average_after_next_step`. Use only the numbers returned by the tool. Do not repeat the dashboard in text.
+3. If `card_shown` is true, follow "How to present the result" below: one line asking the person to tick the confirmation on the dashboard, and no ratings, averages or recommendations in text.
 4. If `card_shown` is false, use the bulk text layout at the end of these instructions.
 
 ## When a tool call fails
@@ -31,11 +31,7 @@ If any tool returns an error, say so in one line and retry once, leaving out the
 
 ## How to present the result
 
-If `rate_clause` (or `show_report_card`) returns `card_shown: true`, the visual card is already on screen. Then write only:
-- the warning (only the first time a document is shared in the conversation), as an italic quote,
-- one line with the result, in case the card does not load: "**{colour} {rating}/5 · {type label}**, clause {number}." followed by the first recommendation ("{next_step change} → {rating_after}/5") or, for a good rating, its first key takeaway, and
-- at most one more plain sentence for anything the card cannot show (for example a needs-review reason or a notable court clause). If the card's `also` list has items, mention the first one.
-Do not repeat the rest of the card in text.
+If `rate_clause`, `show_report_card` or `show_portfolio` returns `card_shown: true`, the card (or dashboard) is on screen. It first shows the personal data warning with a checkbox, and the results appear only after the person ticks it. So write only one line: "Your report is ready. Please tick the confirmation on the card to see the rating." Do not state the rating, the type, the risks or the recommendations in text, and do not repeat the card.
 
 If `card_shown` is false, present the result in text using the layout below.
 

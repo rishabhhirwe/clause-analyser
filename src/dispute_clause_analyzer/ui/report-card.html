@@ -79,6 +79,11 @@
   .dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; }
   .row .name { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
   .detail { margin: 2px 0 12px; padding: 16px 18px; border: 1px solid var(--line); border-left: 4px solid var(--tone); border-radius: 12px; background: var(--bg); }
+  .gate { padding: 4px 2px 8px; }
+  .gate h2 { margin: 0 0 8px; font-size: 18px; color: var(--yellow); }
+  .gate p { margin: 0 0 14px; }
+  .gate label { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 10px; background: var(--yellow-bg); cursor: pointer; font-weight: 600; }
+  .gate input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; cursor: pointer; }
   .note { margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--panel); font-size: 13px; }
   .flag { color: var(--orange); }
   .good { color: var(--green); }
@@ -109,7 +114,7 @@
   var PROTOCOL_VERSION = "2026-01-26";
   var nextId = 1;
   var pending = {};
-  var state = { card: null, step: 0, filter: "all", open: null };
+  var state = { card: null, step: 0, filter: "all", open: null, confirmed: false };
 
   function send(message) { window.parent.postMessage(message, "*"); }
   function notify(method, params) { send({ jsonrpc: "2.0", method: method, params: params || {} }); }
@@ -220,6 +225,19 @@
     var list = el("ul", "takeaways");
     items.forEach(function (t) { list.appendChild(el("li", null, t)); });
     return add(el("div"), el("p", "section", "Key takeaways"), list);
+  }
+
+  var CONFIRM_TEXT = "I confirm that all personal information has been redacted.";
+
+  // Shown before any result: the rating appears only once the person ticks the box (DPDP Act).
+  function privacyGate(warning) {
+    var box = el("div", "gate");
+    var tick = document.createElement("input");
+    tick.type = "checkbox";
+    tick.addEventListener("change", function () { if (tick.checked) { state.confirmed = true; render(); } });
+    var label = add(el("label"), tick, el("span", null, CONFIRM_TEXT));
+    var body = (warning || "").replace(/^Warning\s*[-–:]\s*/, "");
+    return add(box, el("h2", null, "Warning"), el("p", null, body), label);
   }
 
   function disclaimerBlock(text) {
@@ -469,6 +487,14 @@
     if (!card) return;
     var root = document.getElementById("card");
     root.replaceChildren();
+    if (!state.confirmed) {
+      root.setAttribute("aria-label", "Confirm personal data was removed");
+      toneVars(root, "yellow");
+      add(root, privacyGate(card.personal_data_warning), add(el("div", "foot"), disclaimerBlock(card.disclaimer)));
+      document.getElementById("waiting").classList.add("hidden");
+      root.classList.remove("hidden");
+      return;
+    }
     if (card.kind === "portfolio") {
       root.setAttribute("aria-label", "Clause Rating Report");
       renderPortfolio(root, card);

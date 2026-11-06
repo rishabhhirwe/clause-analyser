@@ -55,3 +55,16 @@ def test_instructions_say_the_rating_shows_the_card_once():
 
     assert "`rate_clause` shows the report card" in text
     assert "Do not call `show_report_card` after `rate_clause`" in text
+
+
+def test_card_and_dashboard_always_carry_the_dpdp_warning():
+    from dispute_clause_analyzer.portfolio import AgreementInput, build_portfolio
+    from dispute_clause_analyzer.report_card import build_report_card, load_card_html
+
+    card = build_report_card(clause_text=CLAUSE, deciding_quote="", clause_reference="", who_picks="")
+    dashboard = build_portfolio([AgreementInput(clause_text=CLAUSE)])
+    html = load_card_html()
+
+    assert "DPDP Act" in card["personal_data_warning"]
+    assert dashboard["personal_data_warning"] == card["personal_data_warning"]
+    assert "function privacyGate(" in html  # shown before the card's and the dashboard's results

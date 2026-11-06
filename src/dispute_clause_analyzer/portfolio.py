@@ -152,4 +152,5 @@ def build_portfolio(agreements: Sequence[AgreementInput], rulebook: Rulebook | N
         "summary": _summary(items, rules),
         "items": items,
         "disclaimer": rules.disclaimer,
+        "personal_data_warning": rules.warning,
     }
