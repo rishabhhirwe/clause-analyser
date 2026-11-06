@@ -4,7 +4,7 @@ services:
   - type: web
     name: clause-analyser
     runtime: docker
-    plan: starter
+    plan: free  # sleeps when idle; change to "starter" (about $7 a month) for real users
     region: singapore
     branch: main
     autoDeploy: true
