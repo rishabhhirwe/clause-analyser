@@ -259,7 +259,8 @@ def rate_clause(
     online_process: str | None = None,
     file_name: str | None = None,
 ) -> dict[str, Any]:
-    """Rate a dispute resolution clause out of 5 and show the visual report card in the chat.
+    """Rate a dispute resolution clause out of 5 and show the visual report card in the chat. Call this for every
+    rating request: never rate a clause yourself, and do not answer from your own reading of the clause.
 
     clause_text: the full dispute resolution clause, copied exactly as written, including all sub-parts.
     claimed_type: the type you believe it is (presolv360, odr, institutional, mutual_consent, unilateral).
@@ -317,8 +318,8 @@ server = MCPServer(
 
 @server.tool(**_labels("Get rating rules"))
 def get_rating_rules() -> dict[str, Any]:
-    """Get Presolv360's rating scale for dispute resolution clauses, the rules for mixed clauses,
-    and the personal information warning. Call this before rating a clause."""
+    """Explain Presolv360's rating scale, the rules for mixed clauses and the personal information warning.
+    Only for when the user asks how the scale works. It does not rate anything: to rate a clause, call rate_clause."""
     return {
         "version": RULES.version,
         "scale": [{"type": t.id, "label": t.label, "rating": t.rating, "meaning": t.meaning} for t in RULES.types],

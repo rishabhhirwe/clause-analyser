@@ -68,3 +68,26 @@ def test_card_and_dashboard_always_carry_the_dpdp_warning():
     assert "DPDP Act" in card["personal_data_warning"]
     assert dashboard["personal_data_warning"] == card["personal_data_warning"]
     assert "function privacyGate(" in html  # shown before the card's and the dashboard's results
+
+
+def test_claude_is_told_every_rating_must_come_from_rate_clause():
+    text = RULES.instructions
+    first_line = text.splitlines()[0]
+
+    assert "Never give a rating, score or type yourself" in text
+    assert "always call `rate_clause`" in text
+    assert "Presolv360 5/5" not in first_line  # the scale is not handed over in the opening line
+    assert "get_rating_rules` if you have not already" not in text  # not a step that lets Claude stop early
+
+
+def test_rate_clause_description_says_to_call_it_for_every_rating():
+    description = " ".join(tools()["rate_clause"].description.split())
+
+    assert "for every rating request" in description
+    assert "never rate a clause yourself" in description.lower()
+
+
+def test_the_rules_tool_tells_claude_it_is_not_a_way_to_rate():
+    description = tools()["get_rating_rules"].description
+
+    assert "does not rate" in description
