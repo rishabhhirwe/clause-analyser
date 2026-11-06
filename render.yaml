@@ -1,0 +1,18 @@
+# Render blueprint: hosts the Clause Analyser connector online from this repository.
+# After the first deploy, set PUBLIC_HOST to the address Render gives (e.g. clause-analyser.onrender.com).
+services:
+  - type: web
+    name: clause-analyser
+    runtime: docker
+    plan: starter
+    region: singapore
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: CLAUSE_ANALYSER_MODE
+        value: online
+      - key: PUBLIC_HOST
+        sync: false
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "60"

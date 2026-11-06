@@ -321,6 +321,9 @@
         done(saved.saved_to ? "✓ Saved to Downloads: " + savedName(saved.saved_to) : "Download not available here");
       });
     }
+    // Online the tool runs on a server, so it can neither look in nor save to the user's Downloads folder:
+    // the app's own download is the only way, and the button simply resets once the dialog closes.
+    var hosted = Boolean(state.card && state.card.hosted);
     button.disabled = true;
     button.textContent = "Preparing PDF…";
     callPdf(false).then(function (data) {
@@ -328,10 +331,14 @@
       var file = { type: "resource", resource: { uri: "file:///" + data.file_name, mimeType: data.mime_type, blob: data.pdf_base64 } };
       return request("ui/download-file", { contents: [file] }).then(function () {
         done(READY);
+        if (hosted) return null;
         return arrived(data.file_name).then(function (found) {
           if (found && button.textContent === READY) button.textContent = "✓ Downloaded: " + data.file_name;
         });
-      }, function (error) { return denied(error) ? done(READY) : saveInstead(); });
+      }, function (error) {
+        if (denied(error)) return done(READY);
+        return hosted ? done("Download not available here") : saveInstead();
+      });
     }).catch(function () { done("Download not available here"); });
   }
 

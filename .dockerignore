@@ -1,0 +1,15 @@
+.git
+.venv
+.github
+.claude
+_session-files
+build
+dist
+dist-bin
+tests
+extension
+scripts
+**/__pycache__
+*.egg-info
+.coverage
+.pytest_cache

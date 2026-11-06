@@ -67,6 +67,22 @@ The server command is `.venv/bin/dispute-clause-analyzer` (it talks to Claude ov
 
 For people working on the code, see `AGENTS.md`.
 
+## Use it online
+
+The connector can also run online, so it works on claude.ai and in the Claude apps without installing anything. Add it once in Claude: **Settings > Connectors > Add custom connector**, and paste the connector's address followed by `/mcp`.
+
+To host it, deploy this repository on Render with `render.yaml` (it builds the `Dockerfile`), then set `PUBLIC_HOST` to the address Render gives. Online, PDFs come from the Download PDF button on the card or dashboard; the tools that save to a Downloads folder are only available when the connector runs on the user's own computer.
+
+## Privacy Policy
+
+- **What is collected:** only what Claude sends to the connector to answer a request: the text of the dispute resolution clause and short details such as the clause reference and seat.
+- **How it is used:** solely to calculate the rating and build the report card or PDF for that request.
+- **Storage and retention:** clause text and reports are not stored, logged or kept after the request is answered. The online server keeps only basic technical logs (time, address and status of each request) for security, and no clause content.
+- **Sharing:** nothing is sold or shared with third parties. The online version runs on Render, which hosts the server.
+- **When it runs on your computer** (desktop extension), nothing is sent to us at all.
+- **Personal data:** please remove names, phone numbers and other personal details from agreements before uploading.
+- **Contact:** privacy questions can be sent to Presolv360 at [CONTACT EMAIL TO BE CONFIRMED].
+
 ## Source of truth
 
 The ratings come from Presolv360's "Clause Rating_Strength wise" document and the 10 reference agreements. This tool gives a first review, not legal advice.

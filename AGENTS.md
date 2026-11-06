@@ -36,13 +36,14 @@ All code is in `src/dispute_clause_analyzer/`.
 | `rules/scale.json` | The five types, their ratings, risk lines, strengths and the wording that signals each type |
 | `rules/improvements.json`, `examples.json` | Suggested better wording; the reference clauses |
 | `rules/warning.md`, `disclaimer.md` | The personal data warning and the disclaimer shown to users |
-| `rules/instructions.md` | How Claude should use the tools (read by Claude at connection) |
+| `rules/instructions.md` | How Claude should use the tools (read by Claude at connection); `pdf_local.md` / `pdf_online.md` add the PDF part for each mode |
 | `classifier.py` | Finds every type in the clause text and averages them for a mixed clause |
 | `report_card.py` | Builds the single-agreement card, including the mixed-clause parts and the seat / place of execution item |
 | `portfolio.py` | Builds the several-agreement dashboard data |
 | `pdf_report.py` | Builds the single and bulk PDFs |
 | `ui/report-card.html` | The card and dashboard (one self-contained page, no `innerHTML`) |
 | `server.py` | The MCP tools |
+| `web.py` | Runs the connector online (HTTPS, `/mcp`, `/health`, rate limit). With `CLAUSE_ANALYSER_MODE=online` the Downloads-folder tools are left out. Hosted on Render via `Dockerfile` and `render.yaml` |
 
 ## How to work on the code
 

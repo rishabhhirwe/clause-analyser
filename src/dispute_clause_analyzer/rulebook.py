@@ -101,7 +101,8 @@ def build_rulebook(
     )
 
 
-def _read_text(name: str) -> str:
+def read_rule_file(name: str) -> str:
+    """Read one of the rule files shipped in the package's rules folder."""
     return resources.files("dispute_clause_analyzer").joinpath(RULES_DIR, name).read_text(encoding="utf-8")
 
 
@@ -109,10 +110,10 @@ def _read_text(name: str) -> str:
 def load_rulebook() -> Rulebook:
     """Load the rule files shipped in the package. Raises ValueError if they are invalid."""
     return build_rulebook(
-        scale=json.loads(_read_text("scale.json")),
-        improvements=json.loads(_read_text("improvements.json")),
-        examples=json.loads(_read_text("examples.json"))["examples"],
-        warning=_read_text("warning.md"),
-        instructions=_read_text("instructions.md"),
-        disclaimer=_read_text("disclaimer.md"),
+        scale=json.loads(read_rule_file("scale.json")),
+        improvements=json.loads(read_rule_file("improvements.json")),
+        examples=json.loads(read_rule_file("examples.json"))["examples"],
+        warning=read_rule_file("warning.md"),
+        instructions=read_rule_file("instructions.md"),
+        disclaimer=read_rule_file("disclaimer.md"),
     )

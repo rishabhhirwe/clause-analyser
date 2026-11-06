@@ -9,16 +9,26 @@ from typing import Any
 from mcp.server.apps import Apps, ResourcePermissions, client_supports_apps
 from mcp.server.mcpserver import Context, MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
+from mcp.types import ToolAnnotations
 
 from dispute_clause_analyzer.classifier import Classification, classify, quote_found
 from dispute_clause_analyzer.pdf_report import build_portfolio_pdf, build_report_pdf, pdf_file_name, portfolio_file_name
 from dispute_clause_analyzer.portfolio import AgreementInput, build_portfolio, portfolio_cards
 from dispute_clause_analyzer.report_card import CARD_URI, build_report_card, load_card_html, rating_view
-from dispute_clause_analyzer.rulebook import RatingType, load_rulebook
+from dispute_clause_analyzer.rulebook import RatingType, load_rulebook, read_rule_file
 
 MAX_CLAUSE_CHARS = 20_000
 
 RULES = load_rulebook()
+
+# "online" when the connector is hosted (see web.py). Online, the server is not on the user's computer, so the
+# tools that save to or look in the user's Downloads folder are left out; the card's Download PDF button is used.
+HOSTED = os.environ.get("CLAUSE_ANALYSER_MODE", "").strip().lower() == "online"
+
+
+def _labels(title: str, read_only: bool = True) -> dict[str, Any]:
+    """A tool's display title and whether it changes anything (Anthropic's directory asks for both)."""
+    return {"title": title, "annotations": ToolAnnotations(title=title, read_only_hint=read_only, destructive_hint=False)}
 
 
 def _known_type(name: str) -> RatingType:
@@ -74,7 +84,7 @@ def _card_from(arguments: dict[str, Any]) -> dict[str, Any]:
     return build_report_card(clause_text=clause_text, rulebook=RULES, **{k: _text(arguments, k) for k in CARD_FIELDS})
 
 
-@apps.tool(resource_uri=CARD_URI, structured_output=True)
+@apps.tool(resource_uri=CARD_URI, structured_output=True, **_labels("Show report card"))
 def show_report_card(
     clause_text: str,
     ctx: Context,
@@ -105,10 +115,10 @@ def show_report_card(
     """
     arguments = {k: v for k, v in locals().items() if k in CARD_FIELDS and v}
     card = _card_from({**arguments, "clause_text": clause_text})
-    return {**card, "card_shown": _card_can_show(ctx)}
+    return {**card, "card_shown": _card_can_show(ctx), "hosted": HOSTED}
 
 
-@apps.tool(resource_uri=CARD_URI, structured_output=True)
+@apps.tool(resource_uri=CARD_URI, structured_output=True, **_labels("Show portfolio dashboard"))
 def show_portfolio(agreements: list[AgreementInput], ctx: Context) -> dict[str, Any]:
     """Show the visual portfolio dashboard for two or more agreements at once. Use this instead of
     show_report_card whenever the user shares several agreements. Every agreement is rated from the
@@ -124,10 +134,10 @@ def show_portfolio(agreements: list[AgreementInput], ctx: Context) -> dict[str, 
         portfolio = build_portfolio(agreements, RULES)
     except ValueError as exc:
         raise ToolError(str(exc)) from exc
-    return {**portfolio, "card_shown": _card_can_show(ctx)}
+    return {**portfolio, "card_shown": _card_can_show(ctx), "hosted": HOSTED}
 
 
-@apps.tool(resource_uri=CARD_URI, visibility=["app"], structured_output=True)
+@apps.tool(resource_uri=CARD_URI, visibility=["app"], structured_output=True, **_labels("Reload report"))
 def reload_report(original_arguments: dict[str, Any]) -> dict[str, Any]:
     """Rebuild a report card or portfolio from the arguments of the original show_report_card or
     show_portfolio call. Called by the card itself when a chat is reopened after the app restarts."""
@@ -135,10 +145,10 @@ def reload_report(original_arguments: dict[str, Any]) -> dict[str, Any]:
     if isinstance(agreements, list):
         try:
             parsed = [AgreementInput(**a) for a in agreements]
-            return {**build_portfolio(parsed, RULES), "card_shown": True}
+            return {**build_portfolio(parsed, RULES), "card_shown": True, "hosted": HOSTED}
         except (ValueError, TypeError) as exc:
             raise ToolError(f"Could not rebuild the portfolio: {exc}") from exc
-    return {**_card_from(original_arguments), "card_shown": True}
+    return {**_card_from(original_arguments), "card_shown": True, "hosted": HOSTED}
 
 
 def _download_dir() -> Path:
@@ -188,7 +198,6 @@ def _pdf_for(arguments: dict[str, Any], title: str | None) -> tuple[int | float 
     return card["rating"], build_report_pdf(card, title=name), pdf_file_name(name)
 
 
-@apps.tool(resource_uri=CARD_URI, visibility=["app"], structured_output=True)
 def download_status(file_name: str) -> dict[str, Any]:
     """Whether a downloaded PDF has arrived in the Downloads folder. Called by the card after the app's
     download dialog closes, because the app reports success even when the user clicks Cancel."""
@@ -198,24 +207,32 @@ def download_status(file_name: str) -> dict[str, Any]:
     return {"file_name": name, "found": (_download_dir() / name).is_file()}
 
 
-@apps.tool(resource_uri=CARD_URI, visibility=["app"], structured_output=True)
+if not HOSTED:
+    apps.tool(resource_uri=CARD_URI, visibility=["app"], structured_output=True,
+              **_labels("Check downloaded PDF"))(download_status)
+
+
+@apps.tool(resource_uri=CARD_URI, visibility=["app"], structured_output=True, **_labels("Make PDF report"))
 def download_report_pdf(original_arguments: dict[str, Any], title: str | None = None, save: bool = False) -> dict[str, Any]:
     """Make a PDF for the Download PDF button: one agreement's card, or (for show_portfolio arguments) a
     summary page plus one page per agreement. With save=True it is also saved to the Downloads folder
-    (used when the app cannot hand the file to the user directly)."""
+    (used when the app cannot hand the file to the user directly). Online, nothing is ever saved."""
     rating, pdf, name = _pdf_for(original_arguments, title)
     return {
         "file_name": name,
         "mime_type": "application/pdf",
         "pdf_base64": base64.b64encode(pdf).decode("ascii"),
-        "saved_to": _save_pdf(pdf, name) if save else None,
+        "saved_to": _save_pdf(pdf, name) if save and not HOSTED else None,
         "rating": rating,
     }
 
 
+PDF_INSTRUCTIONS = read_rule_file("pdf_online.md" if HOSTED else "pdf_local.md").strip()
+
 server = MCPServer(
     name="Dispute Clause Analyzer",
-    instructions=f"{RULES.instructions}\n\nPersonal information warning to show the user:\n{RULES.warning}",
+    instructions=(f"{RULES.instructions}\n\n{PDF_INSTRUCTIONS}\n\n"
+                  f"Personal information warning to show the user:\n{RULES.warning}"),
     version="0.3.0",
     extensions=[apps],
 )
@@ -240,7 +257,7 @@ def _reason(result: Classification) -> str:
     return f"{rating_type.label} ({rating_type.rating}/5): {rating_type.meaning}"
 
 
-@server.tool()
+@server.tool(**_labels("Get rating rules"))
 def get_rating_rules() -> dict[str, Any]:
     """Get Presolv360's rating scale for dispute resolution clauses, the rules for mixed clauses,
     and the personal information warning. Call this before rating a clause."""
@@ -252,7 +269,7 @@ def get_rating_rules() -> dict[str, Any]:
     }
 
 
-@server.tool()
+@server.tool(**_labels("Rate clause"))
 def rate_clause(clause_text: str, claimed_type: str | None = None, deciding_quote: str | None = None) -> dict[str, Any]:
     """Rate a dispute resolution clause out of 5.
 
@@ -283,7 +300,7 @@ def rate_clause(clause_text: str, claimed_type: str | None = None, deciding_quot
     }
 
 
-@server.tool()
+@server.tool(**_labels("Get example clauses"))
 def get_examples(type: str | None = None) -> dict[str, Any]:
     """Get reference clauses with confirmed ratings, optionally filtered by type
     (presolv360, odr, institutional, mutual_consent, unilateral). Mixed clauses are listed under each of their parts."""
@@ -292,7 +309,7 @@ def get_examples(type: str | None = None) -> dict[str, Any]:
     return {"examples": examples}
 
 
-@server.tool()
+@server.tool(**_labels("Suggest better wording"))
 def suggest_better_clause(current_type: str) -> dict[str, Any]:
     """Get the smallest change that moves a clause up the scale, plus the wording that reaches 5/5.
     current_type is the type returned by rate_clause."""
@@ -307,7 +324,6 @@ def suggest_better_clause(current_type: str) -> dict[str, Any]:
     }
 
 
-@server.tool()
 def save_report_pdf(
     clause_text: str,
     title: str | None = None,
@@ -327,7 +343,6 @@ def save_report_pdf(
     return {"saved_to": saved, "file_name": Path(saved).name, "rating": rating}
 
 
-@server.tool()
 def save_portfolio_pdf(agreements: list[AgreementInput], title: str | None = None) -> dict[str, Any]:
     """Save one PDF covering several agreements to the user's Downloads folder: a summary page, then one
     page per agreement, in the order they were uploaded. Use this when the user asks for a PDF of a bulk
@@ -342,6 +357,11 @@ def _saved_or_error(pdf: bytes, name: str) -> str:
     if saved is None:
         raise ToolError(f"Could not save the PDF to {_download_dir()}.")
     return saved
+
+
+if not HOSTED:
+    server.tool(**_labels("Save PDF report", read_only=False))(save_report_pdf)
+    server.tool(**_labels("Save portfolio PDF", read_only=False))(save_portfolio_pdf)
 
 
 def main() -> None:
